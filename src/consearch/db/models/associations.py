@@ -1,6 +1,6 @@
 """Association/junction tables for many-to-many relationships."""
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Table, UniqueConstraint
+from sqlalchemy import Column, Float, ForeignKey, Integer, String, Table, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.sql import text
@@ -50,7 +50,7 @@ work_relations = Table(
         nullable=False,
     ),
     Column("relation_type", String(50), nullable=False),  # WorkRelationType enum value
-    Column("confidence", nullable=False, default=1.0),
+    Column("confidence", Float, nullable=False, default=1.0),
     Column("metadata", JSONB, nullable=True),  # Extra info about the relationship
     UniqueConstraint("from_work_id", "to_work_id", "relation_type", name="uq_work_relation"),
 )

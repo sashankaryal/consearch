@@ -18,7 +18,7 @@ class ConsearchSettings(BaseSettings):
 
     # Database
     database_url: PostgresDsn = Field(
-        default="postgresql+asyncpg://consearch:consearch@localhost:5432/consearch",
+        default="postgresql+asyncpg://consearch:consearch@localhost:5433/consearch",
         description="PostgreSQL connection URL",
     )
 

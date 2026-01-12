@@ -100,7 +100,8 @@ class TestDetectEndpoint:
         assert response.status_code == 200
         data = response.json()
         assert data["detectedType"] == "doi"
-        assert data["consumableType"] == "paper"
+        # DOIs can be for both books and papers, so consumableType is None
+        assert data["consumableType"] is None
 
     async def test_detect_arxiv(self, test_client: AsyncClient):
         """Should detect arXiv ID."""
@@ -184,8 +185,8 @@ class TestResolveBookEndpoint:
         response = await test_client.post(
             "/api/v1/resolve/book",
             json={
-                "query": "10.1038/nature12373",
-                # DOI will be detected, which is paper-only
+                "query": "arXiv:2301.12345",
+                # arXiv IDs are paper-only, should fail for book resolution
             },
         )
 

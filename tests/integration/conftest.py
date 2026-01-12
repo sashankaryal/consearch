@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import os
 from typing import AsyncIterator
 from uuid import uuid4
@@ -29,46 +28,47 @@ def database_url() -> str:
     """Get test database URL from environment or use default."""
     return os.getenv(
         "TEST_DATABASE_URL",
-        "postgresql+asyncpg://postgres:postgres@localhost:5432/consearch_test",
+        "postgresql+asyncpg://consearch:consearch@localhost:5433/consearch_test",
     )
 
 
-@pytest.fixture(scope="session")
-def event_loop():
-    """Create event loop for session-scoped fixtures."""
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
-
-
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 async def db_engine(database_url: str):
-    """Create test database engine (session-scoped)."""
+    """
+    Create a fresh database engine for each test.
+
+    Each test gets its own engine to avoid event loop mismatch issues
+    with asyncpg connection pools.
+    """
     engine = create_async_engine(
         database_url,
         echo=False,
-        pool_size=5,
-        max_overflow=10,
+        pool_size=2,
+        max_overflow=5,
+        pool_pre_ping=True,
     )
 
-    # Create all tables
+    # Ensure tables exist
     async with engine.begin() as conn:
-        # Install required extensions
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS pg_trgm"))
         await conn.run_sync(Base.metadata.create_all)
 
     yield engine
 
-    # Drop all tables after tests
+    # Clean up all data and dispose engine
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+        # Delete in correct order to respect foreign key constraints
+        await conn.execute(text("DELETE FROM work_authors"))
+        await conn.execute(text("DELETE FROM work_relations"))
+        await conn.execute(text("DELETE FROM works"))
+        await conn.execute(text("DELETE FROM authors"))
 
     await engine.dispose()
 
 
-@pytest.fixture(scope="session")
-def db_session_factory(db_engine) -> async_sessionmaker[AsyncSession]:
-    """Create session factory (session-scoped)."""
+@pytest.fixture(scope="function")
+async def db_session_factory(db_engine) -> async_sessionmaker[AsyncSession]:
+    """Create session factory from engine."""
     return async_sessionmaker(
         db_engine,
         expire_on_commit=False,
@@ -79,17 +79,13 @@ def db_session_factory(db_engine) -> async_sessionmaker[AsyncSession]:
 @pytest.fixture
 async def db_session(db_session_factory) -> AsyncIterator[AsyncSession]:
     """
-    Get database session with automatic rollback.
+    Get database session with automatic cleanup.
 
-    Each test gets a fresh transaction that is rolled back after the test,
-    ensuring test isolation without data persistence.
+    Each test gets a fresh session. Data is committed to allow proper
+    testing of persistence, but cleaned up after the test.
     """
     async with db_session_factory() as session:
-        # Start a nested transaction for test isolation
-        async with session.begin():
-            yield session
-            # Rollback automatically happens on context exit
-            await session.rollback()
+        yield session
 
 
 # ============================================================================
@@ -97,23 +93,18 @@ async def db_session(db_session_factory) -> AsyncIterator[AsyncSession]:
 # ============================================================================
 
 
-@pytest.fixture
-async def sample_author(db_session: AsyncSession) -> AuthorModel:
-    """Create a sample author in the database."""
-    author = AuthorModel(
+def _create_sample_author() -> AuthorModel:
+    """Create a sample author model (not persisted)."""
+    return AuthorModel(
         id=uuid4(),
         name="Robert C. Martin",
         name_normalized="robert c martin",
         external_ids={"orcid": "0000-0001-2345-6789"},
     )
-    db_session.add(author)
-    await db_session.flush()
-    return author
 
 
-@pytest.fixture
-async def sample_book_work(db_session: AsyncSession, sample_author: AuthorModel) -> WorkModel:
-    """Create a sample book work in the database."""
+def _create_sample_book_work(author: AuthorModel | None = None) -> WorkModel:
+    """Create a sample book work model (not persisted)."""
     work = WorkModel(
         id=uuid4(),
         work_type=ConsumableType.BOOK,
@@ -128,9 +119,29 @@ async def sample_book_work(db_session: AsyncSession, sample_author: AuthorModel)
         },
         confidence=1.0,
     )
-    work.authors.append(sample_author)
+    if author:
+        work.authors.append(author)
+    return work
+
+
+@pytest.fixture
+async def sample_author(db_session: AsyncSession) -> AuthorModel:
+    """Create a sample author in the database."""
+    author = _create_sample_author()
+    db_session.add(author)
+    await db_session.commit()
+    return author
+
+
+@pytest.fixture
+async def sample_book_work(db_session: AsyncSession) -> WorkModel:
+    """Create a sample book work with author in the database."""
+    author = _create_sample_author()
+    db_session.add(author)
+
+    work = _create_sample_book_work(author)
     db_session.add(work)
-    await db_session.flush()
+    await db_session.commit()
     return work
 
 
@@ -160,7 +171,7 @@ async def sample_paper_work(db_session: AsyncSession) -> WorkModel:
     )
     work.authors.append(author)
     db_session.add(work)
-    await db_session.flush()
+    await db_session.commit()
     return work
 
 
@@ -181,7 +192,7 @@ async def multiple_works(db_session: AsyncSession) -> list[WorkModel]:
         )
         db_session.add(work)
         works.append(work)
-    await db_session.flush()
+    await db_session.commit()
     return works
 
 
@@ -195,7 +206,14 @@ async def test_app(db_session_factory):
     """Create test FastAPI application with mocked dependencies."""
     from fastapi import FastAPI
 
+    from consearch.api.dependencies import (
+        get_cache_client,
+        get_db_session,
+        get_resolver_registry,
+        get_search_indexer,
+    )
     from consearch.api.routes import health_router, resolve_router, search_router
+    from consearch.resolution.registry import ResolverRegistry
 
     # Create a minimal app for testing
     app = FastAPI()
@@ -203,21 +221,44 @@ async def test_app(db_session_factory):
     app.include_router(resolve_router, prefix="/api/v1")
     app.include_router(search_router, prefix="/api/v1")
 
-    # Inject test dependencies into app state
+    # Store in app state (for routes that access state directly)
     app.state.db_session_factory = db_session_factory
     app.state.cache_client = None
     app.state.search_client = None
     app.state.search_indexer = None
 
-    # Create a minimal resolver registry for testing
-    from consearch.resolution.registry import ResolverRegistry
+    registry = ResolverRegistry()
+    app.state.resolver_registry = registry
 
-    app.state.resolver_registry = ResolverRegistry()
+    # Override dependency injection functions
+    async def override_db_session():
+        async with db_session_factory() as session:
+            try:
+                yield session
+                await session.commit()
+            except Exception:
+                await session.rollback()
+                raise
+
+    async def override_resolver_registry():
+        return registry
+
+    async def override_cache_client():
+        return None
+
+    async def override_search_indexer():
+        return None
+
+    app.dependency_overrides[get_db_session] = override_db_session
+    app.dependency_overrides[get_resolver_registry] = override_resolver_registry
+    app.dependency_overrides[get_cache_client] = override_cache_client
+    app.dependency_overrides[get_search_indexer] = override_search_indexer
 
     yield app
 
     # Cleanup
-    await app.state.resolver_registry.close_all()
+    app.dependency_overrides.clear()
+    await registry.close_all()
 
 
 @pytest.fixture

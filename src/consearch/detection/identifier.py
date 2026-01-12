@@ -8,7 +8,7 @@ from typing import ClassVar
 from urllib.parse import urlparse
 
 from consearch.core.identifiers import DOI, ISBN, ArXivID
-from consearch.core.types import InputType
+from consearch.core.types import ConsumableType, InputType
 
 
 @dataclass
@@ -19,6 +19,24 @@ class DetectionResult:
     confidence: float  # 0.0 to 1.0
     normalized_value: str | None = None
     parsed_identifier: ISBN | DOI | ArXivID | None = None
+
+    @property
+    def consumable_type(self) -> ConsumableType | None:
+        """Derive the consumable type from the detected input type.
+
+        Returns:
+            ConsumableType.BOOK for ISBN types
+            ConsumableType.PAPER for arXiv/PMID types
+            None for types that could be either (DOI, title, etc.)
+        """
+        match self.input_type:
+            case InputType.ISBN_10 | InputType.ISBN_13:
+                return ConsumableType.BOOK
+            case InputType.ARXIV | InputType.PMID:
+                return ConsumableType.PAPER
+            case _:
+                # DOI, URL, TITLE, CITATION, UNKNOWN could be either
+                return None
 
     def __repr__(self) -> str:
         return (
