@@ -199,7 +199,8 @@ class ArXivID(BaseModel):
             normalized = normalized[6:].strip()
 
         if "/" in normalized:
-            return cls(value=normalized, format="old")
+            # Old format: lowercase the archive prefix
+            return cls(value=normalized.lower(), format="old")
         return cls(value=normalized, format="new")
 
     @property

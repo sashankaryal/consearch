@@ -32,6 +32,7 @@ class SemanticScholarResolver(AbstractPaperResolver):
     SUPPORTED_INPUT_TYPES: ClassVar[frozenset[InputType]] = frozenset({
         InputType.DOI,
         InputType.ARXIV,
+        InputType.PMID,
         InputType.TITLE,
     })
     _BASE_RELIABILITY: ClassVar[float] = 0.85

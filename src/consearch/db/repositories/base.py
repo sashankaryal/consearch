@@ -31,7 +31,7 @@ class BaseRepository(Generic[T]):
         result = await self._session.execute(stmt)
         return result.scalars().all()
 
-    async def list(
+    async def list_all(
         self,
         *,
         offset: int = 0,

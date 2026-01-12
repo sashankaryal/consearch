@@ -1,0 +1,122 @@
+{
+  "status": "ok",
+  "message-type": "work",
+  "message-version": "1.0.0",
+  "message": {
+    "indexed": {
+      "date-parts": [[2024, 1, 15]],
+      "date-time": "2024-01-15T00:00:00Z",
+      "timestamp": 1705276800000
+    },
+    "reference-count": 30,
+    "publisher": "Springer Science and Business Media LLC",
+    "issue": "7463",
+    "license": [
+      {
+        "start": {
+          "date-parts": [[2013, 8, 22]],
+          "date-time": "2013-08-22T00:00:00Z",
+          "timestamp": 1377129600000
+        },
+        "content-version": "tdm",
+        "delay-in-days": 0,
+        "URL": "https://www.springernature.com/gp/researchers/text-and-data-mining"
+      }
+    ],
+    "content-domain": {
+      "domain": ["nature.com"],
+      "crossmark-restriction": true
+    },
+    "short-container-title": ["Nature"],
+    "DOI": "10.1038/nature12373",
+    "type": "journal-article",
+    "created": {
+      "date-parts": [[2013, 8, 18]],
+      "date-time": "2013-08-18T22:00:00Z",
+      "timestamp": 1376863200000
+    },
+    "page": "476-480",
+    "update-policy": "http://dx.doi.org/10.1007/springer_crossmark_policy",
+    "source": "Crossref",
+    "is-referenced-by-count": 1523,
+    "title": ["DNA sequencing with nanopores"],
+    "prefix": "10.1038",
+    "volume": "500",
+    "author": [
+      {
+        "given": "Elizabeth",
+        "family": "Pennisi",
+        "sequence": "first",
+        "affiliation": [
+          {"name": "Science Magazine"}
+        ],
+        "ORCID": "https://orcid.org/0000-0002-1234-5678"
+      },
+      {
+        "given": "John",
+        "family": "Smith",
+        "sequence": "additional",
+        "affiliation": [
+          {"name": "Example University"},
+          {"name": "Research Institute"}
+        ]
+      }
+    ],
+    "member": "297",
+    "published-online": {
+      "date-parts": [[2013, 8, 22]]
+    },
+    "reference": [
+      {
+        "key": "ref1",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1000/example1"
+      },
+      {
+        "key": "ref2",
+        "doi-asserted-by": "crossref",
+        "DOI": "10.1000/example2"
+      }
+    ],
+    "container-title": ["Nature"],
+    "language": "en",
+    "link": [
+      {
+        "URL": "https://www.nature.com/articles/nature12373.pdf",
+        "content-type": "application/pdf",
+        "content-version": "vor",
+        "intended-application": "text-mining"
+      }
+    ],
+    "deposited": {
+      "date-parts": [[2024, 1, 1]],
+      "date-time": "2024-01-01T00:00:00Z",
+      "timestamp": 1704067200000
+    },
+    "score": 1,
+    "resource": {
+      "primary": {
+        "URL": "https://www.nature.com/articles/nature12373"
+      }
+    },
+    "subtitle": [],
+    "short-title": [],
+    "issued": {
+      "date-parts": [[2013, 8, 22]]
+    },
+    "references-count": 30,
+    "journal-issue": {
+      "issue": "7463",
+      "published-print": {
+        "date-parts": [[2013, 8, 22]]
+      }
+    },
+    "URL": "http://dx.doi.org/10.1038/nature12373",
+    "ISSN": ["0028-0836", "1476-4687"],
+    "subject": ["Multidisciplinary"],
+    "published": {
+      "date-parts": [[2013, 8, 22]]
+    },
+    "abstract": "<jats:p>DNA sequencing technology continues to advance at a rapid pace. This article reviews the development of nanopore-based sequencing methods and their potential for revolutionizing genomic analysis.</jats:p>"
+  }
+}

@@ -183,19 +183,22 @@ class CrossrefResolver(AbstractPaperResolver):
         if isinstance(title, list):
             title = title[0] if title else "Unknown"
 
-        # Parse publication date
+        # Parse publication date (try multiple fields)
         pub_date = None
         year = None
-        if date_parts := data.get("published", {}).get("date-parts", [[]])[0]:
-            year_val = date_parts[0] if len(date_parts) > 0 else None
-            month = date_parts[1] if len(date_parts) > 1 else 1
-            day = date_parts[2] if len(date_parts) > 2 else 1
-            if year_val:
-                year = year_val
-                try:
-                    pub_date = date(year_val, month, day)
-                except ValueError:
-                    pass
+        for date_field in ["published", "published-print", "published-online", "issued"]:
+            if date_info := data.get(date_field, {}):
+                if date_parts := date_info.get("date-parts", [[]])[0]:
+                    year_val = date_parts[0] if len(date_parts) > 0 else None
+                    month = date_parts[1] if len(date_parts) > 1 else 1
+                    day = date_parts[2] if len(date_parts) > 2 else 1
+                    if year_val:
+                        year = year_val
+                        try:
+                            pub_date = date(year_val, month, day)
+                        except ValueError:
+                            pass
+                        break
 
         # Parse journal
         journal = data.get("container-title", [])
@@ -207,17 +210,29 @@ class CrossrefResolver(AbstractPaperResolver):
             crossref_id=data.get("DOI"),
         )
 
+        # Extract and clean abstract (strip JATS XML tags)
+        abstract = data.get("abstract")
+        if abstract:
+            import re
+            abstract = re.sub(r"<[^>]+>", "", abstract)
+
+        # Extract citation count and reference count
+        citation_count = data.get("is-referenced-by-count")
+        reference_count = data.get("references-count")
+
         return PaperRecord(
             title=title,
             authors=authors,
             year=year,
             publication_date=pub_date,
             identifiers=identifiers,
-            abstract=data.get("abstract"),
+            abstract=abstract,
             journal=journal,
             volume=data.get("volume"),
             issue=data.get("issue"),
             pages_range=data.get("page"),
+            citation_count=citation_count,
+            reference_count=reference_count,
             url=doi.url if doi else None,
             source_metadata=SourceMetadata(
                 source=self.source_name,

@@ -1,0 +1,86 @@
+{
+  "kind": "books#volumes",
+  "totalItems": 1,
+  "items": [
+    {
+      "kind": "books#volume",
+      "id": "hjEFCAAAQBAJ",
+      "etag": "sLHgCPcGYz0",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/hjEFCAAAQBAJ",
+      "volumeInfo": {
+        "title": "Clean Code",
+        "subtitle": "A Handbook of Agile Software Craftsmanship",
+        "authors": [
+          "Robert C. Martin"
+        ],
+        "publisher": "Pearson Education",
+        "publishedDate": "2008-08-01",
+        "description": "Even bad code can function. But if code isn't clean, it can bring a development organization to its knees. Every year, countless hours and significant resources are lost because of poorly written code. But it doesn't have to be that way.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "0134093410"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9780134093413"
+          }
+        ],
+        "readingModes": {
+          "text": true,
+          "image": true
+        },
+        "pageCount": 464,
+        "printType": "BOOK",
+        "categories": [
+          "Computers / Programming / General",
+          "Computers / Software Development & Engineering / General"
+        ],
+        "averageRating": 4.5,
+        "ratingsCount": 245,
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": true,
+        "contentVersion": "1.2.2.0.preview.3",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=hjEFCAAAQBAJ&printsec=frontcover&img=1&zoom=5",
+          "thumbnail": "http://books.google.com/books/content?id=hjEFCAAAQBAJ&printsec=frontcover&img=1&zoom=1"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.com/books?id=hjEFCAAAQBAJ&printsec=frontcover&dq=isbn:9780134093413&hl=en&cd=1&source=gbs_api",
+        "infoLink": "https://play.google.com/store/books/details?id=hjEFCAAAQBAJ&source=gbs_api",
+        "canonicalVolumeLink": "https://play.google.com/store/books/details?id=hjEFCAAAQBAJ"
+      },
+      "saleInfo": {
+        "country": "US",
+        "saleability": "FOR_SALE",
+        "isEbook": true,
+        "listPrice": {
+          "amount": 39.99,
+          "currencyCode": "USD"
+        }
+      },
+      "accessInfo": {
+        "country": "US",
+        "viewability": "PARTIAL",
+        "embeddable": true,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED_FOR_ACCESSIBILITY",
+        "epub": {
+          "isAvailable": true,
+          "acsTokenLink": "http://books.google.com/books/download/Clean_Code-sample-epub.acsm"
+        },
+        "pdf": {
+          "isAvailable": true,
+          "acsTokenLink": "http://books.google.com/books/download/Clean_Code-sample-pdf.acsm"
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=hjEFCAAAQBAJ",
+        "accessViewStatus": "SAMPLE",
+        "quoteSharingAllowed": false
+      }
+    }
+  ]
+}

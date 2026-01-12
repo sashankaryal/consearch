@@ -69,15 +69,14 @@ def normalize_author_name(name: str) -> str:
     - "Smith, John" -> "john smith"
     - "J. Smith" -> "j smith"
     """
-    normalized = normalize_text(name)
-
-    # Handle "Last, First" format
+    # Handle "Last, First" format before normalizing away the comma
     if "," in name:
-        parts = [p.strip() for p in normalized.split(",", 1)]
+        parts = [p.strip() for p in name.split(",", 1)]
         if len(parts) == 2:
-            normalized = f"{parts[1]} {parts[0]}"
+            # Reorder: "Last, First" -> "First Last"
+            name = f"{parts[1]} {parts[0]}"
 
-    return normalized
+    return normalize_text(name)
 
 
 def isbn_10_to_13(isbn10: str) -> str:

@@ -191,9 +191,10 @@ class ISBNDbResolver(AbstractBookResolver):
             if author_name:
                 authors.append(Author(name=author_name))
 
-        # Extract publication year from publish_date
+        # Extract publication year from publish_date or date_published
         year = None
-        if publish_date := data.get("publish_date"):
+        publish_date = data.get("publish_date") or data.get("date_published")
+        if publish_date:
             if match := re.search(r"\b(19|20)\d{2}\b", str(publish_date)):
                 year = int(match.group())
 

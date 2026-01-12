@@ -1,0 +1,99 @@
+{
+  "paperId": "abc123def456789",
+  "externalIds": {
+    "DOI": "10.1038/nature12373",
+    "ArXiv": "1308.4567",
+    "PubMed": "23965470",
+    "MAG": "2159104098",
+    "CorpusId": 4301234
+  },
+  "corpusId": 4301234,
+  "publicationVenue": {
+    "id": "6c24a0a0-b07d-4c4c-b8a1-96c3a8c8f314",
+    "name": "Nature",
+    "type": "journal",
+    "alternate_names": ["Nat"],
+    "issn": "0028-0836",
+    "url": "https://www.nature.com/"
+  },
+  "url": "https://www.semanticscholar.org/paper/abc123def456789",
+  "title": "DNA sequencing with nanopores",
+  "abstract": "DNA sequencing technology continues to advance at a rapid pace. This article reviews the development of nanopore-based sequencing methods and their potential for revolutionizing genomic analysis.",
+  "venue": "Nature",
+  "year": 2013,
+  "referenceCount": 30,
+  "citationCount": 1523,
+  "influentialCitationCount": 187,
+  "isOpenAccess": true,
+  "openAccessPdf": {
+    "url": "https://www.nature.com/articles/nature12373.pdf",
+    "status": "BRONZE"
+  },
+  "fieldsOfStudy": [
+    "Biology",
+    "Medicine",
+    "Computer Science"
+  ],
+  "s2FieldsOfStudy": [
+    {
+      "category": "Biology",
+      "source": "external"
+    },
+    {
+      "category": "Medicine",
+      "source": "external"
+    },
+    {
+      "category": "Computer Science",
+      "source": "s2-fos-model"
+    }
+  ],
+  "publicationTypes": [
+    "JournalArticle",
+    "Review"
+  ],
+  "publicationDate": "2013-08-22",
+  "journal": {
+    "name": "Nature",
+    "pages": "476-480",
+    "volume": "500"
+  },
+  "authors": [
+    {
+      "authorId": "1234567",
+      "externalIds": {
+        "ORCID": "0000-0002-1234-5678"
+      },
+      "url": "https://www.semanticscholar.org/author/1234567",
+      "name": "Elizabeth Pennisi",
+      "affiliations": ["Science Magazine"],
+      "homepage": null,
+      "paperCount": 245,
+      "citationCount": 12500,
+      "hIndex": 42
+    },
+    {
+      "authorId": "7654321",
+      "externalIds": {},
+      "url": "https://www.semanticscholar.org/author/7654321",
+      "name": "John Smith",
+      "affiliations": ["Example University", "Research Institute"],
+      "homepage": "https://example.edu/~jsmith",
+      "paperCount": 89,
+      "citationCount": 3400,
+      "hIndex": 25
+    }
+  ],
+  "citations": [
+    {
+      "paperId": "citing1",
+      "title": "Advances in nanopore technology"
+    }
+  ],
+  "references": [
+    {
+      "paperId": "ref1",
+      "title": "Early work on nanopores"
+    }
+  ]
+}

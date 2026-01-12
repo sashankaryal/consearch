@@ -32,7 +32,7 @@ class IdentifierDetector:
 
     # Regex patterns for detection (looser than validation patterns)
     ISBN_PATTERN: ClassVar[re.Pattern[str]] = re.compile(
-        r"^(?:ISBN[:\s-]*)?"  # Optional ISBN prefix
+        r"^(?:ISBN(?:-?(?:10|13))?[:\s]*)?"  # Optional ISBN/ISBN-10/ISBN-13 prefix
         r"(97[89][-\s]?)?"  # Optional 978/979 prefix
         r"([\dX][-\s]?){9,12}"  # Digits with optional separators
         r"[\dX]$",  # Final digit/X
@@ -45,9 +45,17 @@ class IdentifierDetector:
         re.IGNORECASE,
     )
 
+    # Valid old arXiv archive prefixes
+    ARXIV_OLD_ARCHIVES: ClassVar[str] = (
+        "acc-phys|adap-org|alg-geom|ao-sci|astro-ph|atom-ph|bayes-an|chao-dyn|"
+        "chem-ph|cmp-lg|comp-gas|cond-mat|cs|dg-ga|funct-an|gr-qc|hep-ex|hep-lat|"
+        "hep-ph|hep-th|math|math-ph|mtrl-th|nlin|nucl-ex|nucl-th|patt-sol|physics|"
+        "plasm-ph|q-alg|q-bio|quant-ph|solv-int|stat|supr-con"
+    )
+
     ARXIV_PATTERN: ClassVar[re.Pattern[str]] = re.compile(
         r"(?:https?://arxiv\.org/(?:abs|pdf)/|arxiv:?\s*)?"  # Optional URL/prefix
-        r"(\d{4}\.\d{4,5}(?:v\d+)?|[a-z-]+/\d{7})",
+        rf"(\d{{4}}\.\d{{4,5}}(?:v\d+)?|(?:{ARXIV_OLD_ARCHIVES})/\d{{7}})",
         re.IGNORECASE,
     )
 
@@ -192,8 +200,10 @@ class IdentifierDetector:
     def _try_isbn(self, query: str) -> DetectionResult | None:
         """Attempt to parse as ISBN."""
         if self.ISBN_PATTERN.match(query):
+            # Remove ISBN prefix before extracting digits (to avoid "13" from "ISBN-13")
+            isbn_part = re.sub(r"^ISBN(?:-?(?:10|13))?[:\s]*", "", query, flags=re.IGNORECASE)
             # Extract digits and X
-            normalized = re.sub(r"[^\dXx]", "", query).upper()
+            normalized = re.sub(r"[^\dXx]", "", isbn_part).upper()
             try:
                 parsed = ISBN.parse(normalized)
                 input_type = InputType.ISBN_10 if parsed.format == "isbn10" else InputType.ISBN_13

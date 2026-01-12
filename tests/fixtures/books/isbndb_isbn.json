@@ -1,0 +1,30 @@
+{
+  "book": {
+    "title": "Clean Code: A Handbook of Agile Software Craftsmanship",
+    "title_long": "Clean Code: A Handbook of Agile Software Craftsmanship (Robert C. Martin Series)",
+    "isbn": "0134093410",
+    "isbn13": "9780134093413",
+    "authors": ["Robert C. Martin"],
+    "publisher": "Prentice Hall",
+    "date_published": "2008-08-01",
+    "binding": "Paperback",
+    "pages": 464,
+    "dimensions": "9.1 x 7.4 x 1.0 inches",
+    "subjects": [
+      "Computer programming",
+      "Software engineering",
+      "Agile software development",
+      "Clean code"
+    ],
+    "synopsis": "Even bad code can function. But if code isn't clean, it can bring a development organization to its knees. Every year, countless hours and significant resources are lost because of poorly written code. But it doesn't have to be that way.",
+    "overview": "This book is about writing clean code that works. It's about good practices in programming.",
+    "image": "https://images.isbndb.com/covers/34/13/9780134093413.jpg",
+    "language": "en",
+    "edition": "1st",
+    "msrp": 49.99,
+    "related": {
+      "type": "isbn",
+      "value": "9780135974445"
+    }
+  }
+}

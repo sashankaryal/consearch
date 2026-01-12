@@ -131,6 +131,7 @@ class PaperRecord(BaseRecord):
     issue: str | None = Field(default=None, description="Issue number")
     pages_range: str | None = Field(default=None, description="Page range (e.g., '123-145')")
     citation_count: int | None = Field(default=None, description="Number of citations")
+    reference_count: int | None = Field(default=None, description="Number of references")
     references: list[str] = Field(default_factory=list, description="DOIs of referenced papers")
     fields_of_study: list[str] = Field(default_factory=list, description="Academic fields")
     pdf_url: HttpUrl | str | None = Field(default=None, description="Direct PDF URL")

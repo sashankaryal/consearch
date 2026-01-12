@@ -1,0 +1,39 @@
+{
+  "ISBN:9780134093413": {
+    "url": "https://openlibrary.org/books/OL27261858M/Clean_Code",
+    "key": "/books/OL27261858M",
+    "title": "Clean Code: A Handbook of Agile Software Craftsmanship",
+    "authors": [
+      {
+        "url": "https://openlibrary.org/authors/OL2896043A/Robert_C._Martin",
+        "name": "Robert C. Martin"
+      }
+    ],
+    "publishers": [
+      {"name": "Prentice Hall"}
+    ],
+    "publish_date": "2008",
+    "number_of_pages": 464,
+    "subjects": [
+      {"name": "Computer programming", "url": "https://openlibrary.org/subjects/computer_programming"},
+      {"name": "Software engineering", "url": "https://openlibrary.org/subjects/software_engineering"},
+      {"name": "Agile software development", "url": "https://openlibrary.org/subjects/agile_software_development"}
+    ],
+    "cover": {
+      "small": "https://covers.openlibrary.org/b/id/8090614-S.jpg",
+      "medium": "https://covers.openlibrary.org/b/id/8090614-M.jpg",
+      "large": "https://covers.openlibrary.org/b/id/8090614-L.jpg"
+    },
+    "identifiers": {
+      "isbn_10": ["0134093410"],
+      "isbn_13": ["9780134093413"],
+      "openlibrary": ["OL27261858M"]
+    },
+    "ebooks": [
+      {
+        "preview_url": "https://archive.org/details/cleancode",
+        "availability": "borrow"
+      }
+    ]
+  }
+}
