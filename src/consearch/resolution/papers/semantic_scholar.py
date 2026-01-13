@@ -6,7 +6,7 @@ import time
 from datetime import date, datetime
 from typing import Any, ClassVar
 
-from consearch.core.identifiers import ArXivID, DOI
+from consearch.core.identifiers import DOI, ArXivID
 from consearch.core.models import Author, Identifiers, PaperRecord, SourceMetadata
 from consearch.core.types import InputType, ResolutionStatus, SourceName
 from consearch.resolution.base import RateLimitConfig, ResolutionResult, ResolverConfig
@@ -29,12 +29,14 @@ class SemanticScholarResolver(AbstractPaperResolver):
         requests_per_second=1.0,  # Conservative for shared pool
         burst_size=1,
     )
-    SUPPORTED_INPUT_TYPES: ClassVar[frozenset[InputType]] = frozenset({
-        InputType.DOI,
-        InputType.ARXIV,
-        InputType.PMID,
-        InputType.TITLE,
-    })
+    SUPPORTED_INPUT_TYPES: ClassVar[frozenset[InputType]] = frozenset(
+        {
+            InputType.DOI,
+            InputType.ARXIV,
+            InputType.PMID,
+            InputType.TITLE,
+        }
+    )
     _BASE_RELIABILITY: ClassVar[float] = 0.85
 
     # Fields to request from API
@@ -156,14 +158,14 @@ class SemanticScholarResolver(AbstractPaperResolver):
     async def search_by_title(
         self,
         title: str,
-        author: str | None = None,
+        _author: str | None = None,
     ) -> ResolutionResult[PaperRecord]:
         """Search Semantic Scholar by title."""
         start = time.monotonic()
 
         try:
             query = title
-            # Note: Semantic Scholar doesn't have explicit author filter in search
+            # Note: Semantic Scholar doesn't support author filtering in search API
 
             params: dict[str, Any] = {
                 "query": query,
@@ -231,10 +233,12 @@ class SemanticScholarResolver(AbstractPaperResolver):
         authors = []
         for author_data in data.get("authors", []):
             name = author_data.get("name", "Unknown")
-            authors.append(Author(
-                name=name,
-                # Semantic Scholar doesn't split given/family names
-            ))
+            authors.append(
+                Author(
+                    name=name,
+                    # Semantic Scholar doesn't split given/family names
+                )
+            )
 
         year = data.get("year")
 

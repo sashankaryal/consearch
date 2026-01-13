@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from functools import lru_cache
-from typing import TYPE_CHECKING, Annotated, AsyncIterator
+from typing import TYPE_CHECKING, Annotated
 
 from fastapi import Depends, Request
 
@@ -20,14 +21,14 @@ if TYPE_CHECKING:
 
 
 @lru_cache
-def get_settings() -> "ConsearchSettings":
+def get_settings() -> ConsearchSettings:
     """Get cached application settings."""
     from consearch.config import ConsearchSettings
 
     return ConsearchSettings()
 
 
-async def get_db_session(request: Request) -> AsyncIterator["AsyncSession"]:
+async def get_db_session(request: Request) -> AsyncIterator[AsyncSession]:
     """
     Get database session from app state.
 
@@ -43,32 +44,32 @@ async def get_db_session(request: Request) -> AsyncIterator["AsyncSession"]:
             raise
 
 
-async def get_cache_client(request: Request) -> "AsyncRedisClient | None":
+async def get_cache_client(request: Request) -> AsyncRedisClient | None:
     """Get Redis cache client from app state."""
     return getattr(request.app.state, "cache_client", None)
 
 
-async def get_resolver_registry(request: Request) -> "ResolverRegistry":
+async def get_resolver_registry(request: Request) -> ResolverRegistry:
     """Get resolver registry from app state."""
     return request.app.state.resolver_registry
 
 
-async def get_search_client(request: Request) -> "AsyncMeilisearchClient | None":
+async def get_search_client(request: Request) -> AsyncMeilisearchClient | None:
     """Get Meilisearch client from app state."""
     return getattr(request.app.state, "search_client", None)
 
 
-async def get_search_indexer(request: Request) -> "SearchIndexer | None":
+async def get_search_indexer(request: Request) -> SearchIndexer | None:
     """Get search indexer from app state."""
     return getattr(request.app.state, "search_indexer", None)
 
 
 async def get_resolution_service(
-    session: "AsyncSession" = Depends(get_db_session),
-    registry: "ResolverRegistry" = Depends(get_resolver_registry),
-    cache: "AsyncRedisClient | None" = Depends(get_cache_client),
-    indexer: "SearchIndexer | None" = Depends(get_search_indexer),
-) -> "ResolutionService":
+    session: AsyncSession = Depends(get_db_session),
+    registry: ResolverRegistry = Depends(get_resolver_registry),
+    cache: AsyncRedisClient | None = Depends(get_cache_client),
+    indexer: SearchIndexer | None = Depends(get_search_indexer),
+) -> ResolutionService:
     """Get resolution service with all dependencies."""
     from consearch.services.resolution import ResolutionService
 
@@ -81,9 +82,9 @@ async def get_resolution_service(
 
 
 async def get_search_service(
-    session: "AsyncSession" = Depends(get_db_session),
-    search_client: "AsyncMeilisearchClient | None" = Depends(get_search_client),
-) -> "SearchService | None":
+    session: AsyncSession = Depends(get_db_session),
+    search_client: AsyncMeilisearchClient | None = Depends(get_search_client),
+) -> SearchService | None:
     """Get search service if Meilisearch is available."""
     if search_client is None:
         return None

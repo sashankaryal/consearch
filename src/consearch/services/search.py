@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
-from uuid import UUID
 
 from consearch.api.schemas import (
     AuthorResponse,
@@ -16,12 +15,11 @@ from consearch.api.schemas import (
     SearchPaperResult,
     SearchPapersResponse,
 )
-from consearch.search.searcher import SearchFilters, Searcher
+from consearch.search.searcher import Searcher, SearchFilters
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
-    from consearch.db.models.work import WorkModel
     from consearch.search.client import AsyncMeilisearchClient
 
 logger = logging.getLogger(__name__)
@@ -36,8 +34,8 @@ class SearchService:
 
     def __init__(
         self,
-        session: "AsyncSession",
-        search_client: "AsyncMeilisearchClient",
+        session: AsyncSession,
+        search_client: AsyncMeilisearchClient,
     ) -> None:
         """
         Initialize the search service.
@@ -94,11 +92,13 @@ class SearchService:
         for hit in search_result.hits:
             book_response = self._hit_to_book_response(hit.data)
             if book_response:
-                results.append(SearchBookResult(
-                    id=hit.id,
-                    score=hit.score,
-                    book=book_response,
-                ))
+                results.append(
+                    SearchBookResult(
+                        id=hit.id,
+                        score=hit.score,
+                        book=book_response,
+                    )
+                )
 
         return SearchBooksResponse(
             total=search_result.total,
@@ -153,11 +153,13 @@ class SearchService:
         for hit in search_result.hits:
             paper_response = self._hit_to_paper_response(hit.data)
             if paper_response:
-                results.append(SearchPaperResult(
-                    id=hit.id,
-                    score=hit.score,
-                    paper=paper_response,
-                ))
+                results.append(
+                    SearchPaperResult(
+                        id=hit.id,
+                        score=hit.score,
+                        paper=paper_response,
+                    )
+                )
 
         return SearchPapersResponse(
             total=search_result.total,
@@ -170,10 +172,7 @@ class SearchService:
     def _hit_to_book_response(self, data: dict) -> BookResponse | None:
         """Convert a search hit to BookResponse."""
         try:
-            authors = [
-                AuthorResponse(name=name)
-                for name in data.get("authors", [])
-            ]
+            authors = [AuthorResponse(name=name) for name in data.get("authors", [])]
 
             idents = data.get("identifiers", {})
             identifiers = IdentifiersResponse(
@@ -197,10 +196,7 @@ class SearchService:
     def _hit_to_paper_response(self, data: dict) -> PaperResponse | None:
         """Convert a search hit to PaperResponse."""
         try:
-            authors = [
-                AuthorResponse(name=name)
-                for name in data.get("authors", [])
-            ]
+            authors = [AuthorResponse(name=name) for name in data.get("authors", [])]
 
             idents = data.get("identifiers", {})
             identifiers = IdentifiersResponse(

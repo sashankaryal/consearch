@@ -26,11 +26,13 @@ class CrossrefResolver(AbstractPaperResolver):
         requests_per_second=50.0,  # Polite pool limit
         burst_size=5,
     )
-    SUPPORTED_INPUT_TYPES: ClassVar[frozenset[InputType]] = frozenset({
-        InputType.DOI,
-        InputType.TITLE,
-        InputType.CITATION,
-    })
+    SUPPORTED_INPUT_TYPES: ClassVar[frozenset[InputType]] = frozenset(
+        {
+            InputType.DOI,
+            InputType.TITLE,
+            InputType.CITATION,
+        }
+    )
     _BASE_RELIABILITY: ClassVar[float] = 0.95  # Authoritative source for DOIs
 
     def __init__(self, config: ResolverConfig | None = None) -> None:
@@ -168,15 +170,17 @@ class CrossrefResolver(AbstractPaperResolver):
             family = author_data.get("family", "")
             name = f"{given} {family}".strip() or "Unknown"
 
-            authors.append(Author(
-                name=name,
-                given_name=given or None,
-                family_name=family or None,
-                orcid=author_data.get("ORCID"),
-                affiliations=[
-                    aff.get("name", "") for aff in author_data.get("affiliation", [])
-                ],
-            ))
+            authors.append(
+                Author(
+                    name=name,
+                    given_name=given or None,
+                    family_name=family or None,
+                    orcid=author_data.get("ORCID"),
+                    affiliations=[
+                        aff.get("name", "") for aff in author_data.get("affiliation", [])
+                    ],
+                )
+            )
 
         # Parse title (can be a list)
         title = data.get("title", ["Unknown"])
@@ -214,6 +218,7 @@ class CrossrefResolver(AbstractPaperResolver):
         abstract = data.get("abstract")
         if abstract:
             import re
+
             abstract = re.sub(r"<[^>]+>", "", abstract)
 
         # Extract citation count and reference count

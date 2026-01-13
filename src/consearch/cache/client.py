@@ -105,7 +105,7 @@ class AsyncRedisClient:
                     result[key] = value
         return result
 
-    async def __aenter__(self) -> "AsyncRedisClient":
+    async def __aenter__(self) -> AsyncRedisClient:
         await self.connect()
         return self
 

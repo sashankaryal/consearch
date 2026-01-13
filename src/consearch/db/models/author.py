@@ -44,7 +44,7 @@ class AuthorModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
 
     # Relationships
-    works: Mapped[list["WorkModel"]] = relationship(
+    works: Mapped[list[WorkModel]] = relationship(
         "WorkModel",
         secondary=work_author_association,
         back_populates="authors",

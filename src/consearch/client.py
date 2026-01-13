@@ -58,7 +58,7 @@ class ConsearchClient:
         self._cache: AsyncRedisClient | None = None
         self._detector = IdentifierDetector()
 
-    async def __aenter__(self) -> "ConsearchClient":
+    async def __aenter__(self) -> ConsearchClient:
         """Initialize resources on context entry."""
         await self._initialize()
         return self

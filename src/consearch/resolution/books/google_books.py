@@ -30,11 +30,13 @@ class GoogleBooksResolver(AbstractBookResolver):
         requests_per_second=1.0,  # Be polite
         burst_size=2,
     )
-    SUPPORTED_INPUT_TYPES: ClassVar[frozenset[InputType]] = frozenset({
-        InputType.ISBN_10,
-        InputType.ISBN_13,
-        InputType.TITLE,
-    })
+    SUPPORTED_INPUT_TYPES: ClassVar[frozenset[InputType]] = frozenset(
+        {
+            InputType.ISBN_10,
+            InputType.ISBN_13,
+            InputType.TITLE,
+        }
+    )
     _BASE_RELIABILITY: ClassVar[float] = 0.85
 
     def __init__(self, config: ResolverConfig | None = None) -> None:
@@ -226,9 +228,7 @@ class GoogleBooksResolver(AbstractBookResolver):
         # Get cover image (prefer larger sizes)
         image_links = volume_info.get("imageLinks", {})
         cover_url = (
-            image_links.get("large")
-            or image_links.get("medium")
-            or image_links.get("thumbnail")
+            image_links.get("large") or image_links.get("medium") or image_links.get("thumbnail")
         )
 
         # Get categories as subjects

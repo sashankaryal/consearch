@@ -86,7 +86,7 @@ class SourceRecordModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
 
     # Relationships
-    work: Mapped["WorkModel"] = relationship(
+    work: Mapped[WorkModel] = relationship(
         "WorkModel",
         back_populates="source_records",
     )
@@ -106,4 +106,6 @@ class SourceRecordModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
 
     def __repr__(self) -> str:
-        return f"<SourceRecordModel(id={self.id}, source={self.source}, source_id='{self.source_id}')>"
+        return (
+            f"<SourceRecordModel(id={self.id}, source={self.source}, source_id='{self.source_id}')>"
+        )

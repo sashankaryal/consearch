@@ -26,11 +26,13 @@ class OpenLibraryResolver(AbstractBookResolver):
         requests_per_second=1.0,  # Be polite
         burst_size=1,
     )
-    SUPPORTED_INPUT_TYPES: ClassVar[frozenset[InputType]] = frozenset({
-        InputType.ISBN_10,
-        InputType.ISBN_13,
-        InputType.TITLE,
-    })
+    SUPPORTED_INPUT_TYPES: ClassVar[frozenset[InputType]] = frozenset(
+        {
+            InputType.ISBN_10,
+            InputType.ISBN_13,
+            InputType.TITLE,
+        }
+    )
     _BASE_RELIABILITY: ClassVar[float] = 0.75  # Community-contributed data
 
     def __init__(self, config: ResolverConfig | None = None) -> None:
@@ -221,6 +223,7 @@ class OpenLibraryResolver(AbstractBookResolver):
         if publish_date := data.get("publish_date"):
             # Try to extract 4-digit year
             import re
+
             if match := re.search(r"\b(19|20)\d{2}\b", publish_date):
                 year = int(match.group())
 
@@ -250,8 +253,11 @@ class OpenLibraryResolver(AbstractBookResolver):
             subjects=data.get("subjects", [])[:10],  # Limit subjects
             cover_image_url=cover_url,
             abstract=description,
-            language=(data.get("languages", [{}])[0].get("key", "").replace("/languages/", "")
-                      if data.get("languages") else None),
+            language=(
+                data.get("languages", [{}])[0].get("key", "").replace("/languages/", "")
+                if data.get("languages")
+                else None
+            ),
             source_metadata=SourceMetadata(
                 source=self.source_name,
                 source_id=data.get("key", ""),

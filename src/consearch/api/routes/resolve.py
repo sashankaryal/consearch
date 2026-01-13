@@ -13,19 +13,19 @@ from consearch.api.schemas import (
     BookResponse,
     IdentifiersResponse,
     PaperResponse,
+    ResolutionSourceResult,
     ResolveBookRequest,
     ResolveBookResponse,
     ResolvePaperRequest,
     ResolvePaperResponse,
-    ResolutionSourceResult,
     SourceMetadataResponse,
 )
 from consearch.core.models import BookRecord, PaperRecord
-from consearch.core.types import ConsumableType, InputType, ResolutionStatus
+from consearch.core.types import ConsumableType, ResolutionStatus
 from consearch.detection.identifier import IdentifierDetector
 
 if TYPE_CHECKING:
-    from consearch.resolution.chain import AggregatedResult
+    pass
 
 router = APIRouter(prefix="/resolve", tags=["resolve"])
 
@@ -130,7 +130,7 @@ def _convert_paper_to_response(record: PaperRecord, include_raw: bool = False) -
 async def resolve_book(
     request: ResolveBookRequest,
     resolution_service: ResolveService,
-    settings: Settings,
+    _settings: Settings,
 ) -> ResolveBookResponse:
     """Resolve book metadata from external sources with caching and persistence."""
     start_time = time.monotonic()
@@ -160,8 +160,7 @@ async def resolve_book(
         detected_input_type=input_type,
         status=ResolutionStatus.SUCCESS if result.success else ResolutionStatus.NOT_FOUND,
         records=[
-            _convert_book_to_response(r, request.include_raw_data)
-            for r in result.all_records
+            _convert_book_to_response(r, request.include_raw_data) for r in result.all_records
         ],
         sources_tried=[
             ResolutionSourceResult(
@@ -187,7 +186,7 @@ async def resolve_book(
 async def resolve_paper(
     request: ResolvePaperRequest,
     resolution_service: ResolveService,
-    settings: Settings,
+    _settings: Settings,
 ) -> ResolvePaperResponse:
     """Resolve paper metadata from external sources with caching and persistence."""
     start_time = time.monotonic()
@@ -217,8 +216,7 @@ async def resolve_paper(
         detected_input_type=input_type,
         status=ResolutionStatus.SUCCESS if result.success else ResolutionStatus.NOT_FOUND,
         records=[
-            _convert_paper_to_response(r, request.include_raw_data)
-            for r in result.all_records
+            _convert_paper_to_response(r, request.include_raw_data) for r in result.all_records
         ],
         sources_tried=[
             ResolutionSourceResult(

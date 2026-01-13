@@ -167,7 +167,7 @@ class Searcher:
 
     def _parse_results(
         self,
-        results: "SearchResults",
+        results: SearchResults,
         query: str,
         page: int,
         page_size: int,
@@ -179,11 +179,13 @@ class Searcher:
                 hit_id = UUID(hit["id"])
                 # Meilisearch provides _rankingScore when available
                 score = getattr(hit, "_rankingScore", None) or 1.0
-                hits.append(SearchHit(
-                    id=hit_id,
-                    score=score,
-                    data=dict(hit),
-                ))
+                hits.append(
+                    SearchHit(
+                        id=hit_id,
+                        score=score,
+                        data=dict(hit),
+                    )
+                )
             except (KeyError, ValueError) as e:
                 logger.warning(f"Invalid hit in search results: {e}")
                 continue

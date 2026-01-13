@@ -33,11 +33,13 @@ class ISBNDbResolver(AbstractBookResolver):
         requests_per_second=1.0,
         burst_size=1,
     )
-    SUPPORTED_INPUT_TYPES: ClassVar[frozenset[InputType]] = frozenset({
-        InputType.ISBN_10,
-        InputType.ISBN_13,
-        InputType.TITLE,
-    })
+    SUPPORTED_INPUT_TYPES: ClassVar[frozenset[InputType]] = frozenset(
+        {
+            InputType.ISBN_10,
+            InputType.ISBN_13,
+            InputType.TITLE,
+        }
+    )
     _BASE_RELIABILITY: ClassVar[float] = 0.90
 
     def __init__(self, config: ResolverConfig | None = None) -> None:

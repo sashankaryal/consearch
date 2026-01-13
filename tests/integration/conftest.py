@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 from uuid import uuid4
 
 import pytest
@@ -16,7 +16,6 @@ from consearch.core.types import ConsumableType
 from consearch.db.base import Base
 from consearch.db.models.author import AuthorModel
 from consearch.db.models.work import WorkModel
-
 
 # ============================================================================
 # Database Fixtures

@@ -12,7 +12,6 @@ from consearch.core.types import InputType, ResolutionStatus, SourceName
 from consearch.resolution.base import AbstractResolver, ResolutionResult, ResolverConfig
 from consearch.resolution.chain import AggregatedResult, ChainResolver, FallbackConfig
 
-
 # ============================================================================
 # Mock Resolver for Testing
 # ============================================================================
@@ -23,11 +22,13 @@ class MockBookResolver(AbstractResolver[BookRecord]):
 
     SOURCE_NAME: ClassVar[SourceName] = SourceName.OPEN_LIBRARY
     BASE_URL: ClassVar[str] = "https://example.com"
-    SUPPORTED_INPUT_TYPES: ClassVar[frozenset[InputType]] = frozenset({
-        InputType.ISBN_10,
-        InputType.ISBN_13,
-        InputType.TITLE,
-    })
+    SUPPORTED_INPUT_TYPES: ClassVar[frozenset[InputType]] = frozenset(
+        {
+            InputType.ISBN_10,
+            InputType.ISBN_13,
+            InputType.TITLE,
+        }
+    )
     _BASE_RELIABILITY: ClassVar[float] = 0.8
 
     def __init__(

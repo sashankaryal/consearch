@@ -1,6 +1,6 @@
 """Work repository with specialized queries."""
 
-from typing import Sequence
+from collections.abc import Sequence
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -40,7 +40,9 @@ class WorkRepository(BaseRepository[WorkModel]):
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_by_identifier(self, identifier_type: str, identifier_value: str) -> WorkModel | None:
+    async def get_by_identifier(
+        self, identifier_type: str, identifier_value: str
+    ) -> WorkModel | None:
         """Find a work by any identifier type."""
         stmt = select(WorkModel).where(
             WorkModel.identifiers[identifier_type].astext == identifier_value
@@ -104,11 +106,6 @@ class WorkRepository(BaseRepository[WorkModel]):
         limit: int = 100,
     ) -> Sequence[WorkModel]:
         """List works by type with pagination."""
-        stmt = (
-            select(WorkModel)
-            .where(WorkModel.work_type == work_type)
-            .offset(offset)
-            .limit(limit)
-        )
+        stmt = select(WorkModel).where(WorkModel.work_type == work_type).offset(offset).limit(limit)
         result = await self._session.execute(stmt)
         return result.scalars().all()

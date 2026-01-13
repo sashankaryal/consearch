@@ -71,7 +71,7 @@ class WorkModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
 
     # Relationships
-    authors: Mapped[list["AuthorModel"]] = relationship(
+    authors: Mapped[list[AuthorModel]] = relationship(
         "AuthorModel",
         secondary=work_author_association,
         back_populates="works",
@@ -79,7 +79,7 @@ class WorkModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         order_by=work_author_association.c.position,
     )
 
-    source_records: Mapped[list["SourceRecordModel"]] = relationship(
+    source_records: Mapped[list[SourceRecordModel]] = relationship(
         "SourceRecordModel",
         back_populates="work",
         lazy="selectin",
@@ -87,7 +87,7 @@ class WorkModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     )
 
     # Self-referential relationships for work connections
-    related_to: Mapped[list["WorkModel"]] = relationship(
+    related_to: Mapped[list[WorkModel]] = relationship(
         "WorkModel",
         secondary=work_relations,
         primaryjoin=lambda: WorkModel.id == work_relations.c.from_work_id,
@@ -95,7 +95,7 @@ class WorkModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         lazy="select",
     )
 
-    related_from: Mapped[list["WorkModel"]] = relationship(
+    related_from: Mapped[list[WorkModel]] = relationship(
         "WorkModel",
         secondary=work_relations,
         primaryjoin=lambda: WorkModel.id == work_relations.c.to_work_id,

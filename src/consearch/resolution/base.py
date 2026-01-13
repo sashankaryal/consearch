@@ -6,9 +6,10 @@ import asyncio
 import time
 from abc import ABC, abstractmethod
 from collections import deque
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from typing import Any, AsyncIterator, ClassVar, Generic, TypeVar
+from typing import Any, ClassVar, Generic, TypeVar
 
 import httpx
 from pydantic import BaseModel, Field
@@ -79,10 +80,9 @@ class AsyncRateLimiter:
         if self._semaphore is None:
             self._semaphore = asyncio.Semaphore(self.config.burst_size)
 
-        async with self._semaphore:
-            async with self._lock:
-                await self._wait_for_permit()
-                self._record_request()
+        async with self._semaphore, self._lock:
+            await self._wait_for_permit()
+            self._record_request()
 
     async def _wait_for_permit(self) -> None:
         """Wait until a request is permitted."""
@@ -151,8 +151,7 @@ class AsyncRateLimiter:
     def should_retry_429(self) -> bool:
         """Whether another 429 retry should be attempted."""
         return (
-            self.config.retry_on_429
-            and self._state.consecutive_429s < self.config.max_429_retries
+            self.config.retry_on_429 and self._state.consecutive_429s < self.config.max_429_retries
         )
 
 
@@ -182,9 +181,7 @@ class AbstractResolver(ABC, Generic[RecordT]):
     def __init__(self, config: ResolverConfig | None = None) -> None:
         self.config = config or ResolverConfig()
         self._client: httpx.AsyncClient | None = None
-        self._rate_limiter = AsyncRateLimiter(
-            self.config.rate_limit or self.DEFAULT_RATE_LIMIT
-        )
+        self._rate_limiter = AsyncRateLimiter(self.config.rate_limit or self.DEFAULT_RATE_LIMIT)
 
         # Reliability tracking
         self._success_count: int = 0
@@ -348,7 +345,7 @@ class AbstractResolver(ABC, Generic[RecordT]):
         """
         ...
 
-    async def __aenter__(self) -> "AbstractResolver[RecordT]":
+    async def __aenter__(self) -> AbstractResolver[RecordT]:
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:

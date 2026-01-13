@@ -61,7 +61,7 @@ class ResolverRegistry:
             raise ValueError(f"Unsupported consumable type: {consumable_type}")
 
     @classmethod
-    def from_settings(cls, settings: "ConsearchSettings") -> "ResolverRegistry":
+    def from_settings(cls, settings: ConsearchSettings) -> ResolverRegistry:
         """
         Create a registry with resolvers configured from settings.
 
@@ -77,7 +77,7 @@ class ResolverRegistry:
 
         return registry
 
-    def _register_book_resolvers(self, settings: "ConsearchSettings") -> None:
+    def _register_book_resolvers(self, settings: ConsearchSettings) -> None:
         """Register book resolvers based on available API keys."""
         from consearch.resolution.books.openlibrary import OpenLibraryResolver
 
@@ -88,9 +88,7 @@ class ResolverRegistry:
                 from consearch.resolution.books.isbndb import ISBNDbResolver
 
                 self.register_book_resolver(
-                    ISBNDbResolver(
-                        ResolverConfig(api_key=settings.isbndb_api_key)
-                    )
+                    ISBNDbResolver(ResolverConfig(api_key=settings.isbndb_api_key))
                 )
             except ImportError:
                 pass
@@ -100,9 +98,7 @@ class ResolverRegistry:
             from consearch.resolution.books.google_books import GoogleBooksResolver
 
             self.register_book_resolver(
-                GoogleBooksResolver(
-                    ResolverConfig(api_key=settings.google_books_api_key)
-                )
+                GoogleBooksResolver(ResolverConfig(api_key=settings.google_books_api_key))
             )
         except ImportError:
             pass
@@ -110,15 +106,13 @@ class ResolverRegistry:
         # OpenLibrary (fallback, no API key needed)
         self.register_book_resolver(OpenLibraryResolver())
 
-    def _register_paper_resolvers(self, settings: "ConsearchSettings") -> None:
+    def _register_paper_resolvers(self, settings: ConsearchSettings) -> None:
         """Register paper resolvers based on available API keys."""
         from consearch.resolution.papers.crossref import CrossrefResolver
 
         # Crossref (primary, email for polite pool)
         self.register_paper_resolver(
-            CrossrefResolver(
-                ResolverConfig(api_key=settings.crossref_email)
-            )
+            CrossrefResolver(ResolverConfig(api_key=settings.crossref_email))
         )
 
         # Semantic Scholar (fallback, optional API key)

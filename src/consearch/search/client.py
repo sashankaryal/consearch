@@ -28,7 +28,15 @@ PAPERS_SETTINGS = MeilisearchSettings(
     searchable_attributes=["title", "authors", "abstract", "journal"],
     filterable_attributes=["year", "journal"],
     sortable_attributes=["year", "citation_count", "created_at"],
-    displayed_attributes=["id", "title", "authors", "year", "journal", "identifiers", "citation_count"],
+    displayed_attributes=[
+        "id",
+        "title",
+        "authors",
+        "year",
+        "journal",
+        "identifiers",
+        "citation_count",
+    ],
 )
 
 
@@ -206,7 +214,7 @@ class AsyncMeilisearchClient:
         client = await self._get_client()
         await client.wait_for_task(task_info.task_uid, timeout_in_ms=timeout_ms)
 
-    async def __aenter__(self) -> "AsyncMeilisearchClient":
+    async def __aenter__(self) -> AsyncMeilisearchClient:
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:

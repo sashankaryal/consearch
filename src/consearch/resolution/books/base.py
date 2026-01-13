@@ -18,11 +18,13 @@ class AbstractBookResolver(AbstractResolver[BookRecord]):
     Provides ISBN handling and book-specific functionality.
     """
 
-    SUPPORTED_INPUT_TYPES: ClassVar[frozenset[InputType]] = frozenset({
-        InputType.ISBN_10,
-        InputType.ISBN_13,
-        InputType.TITLE,
-    })
+    SUPPORTED_INPUT_TYPES: ClassVar[frozenset[InputType]] = frozenset(
+        {
+            InputType.ISBN_10,
+            InputType.ISBN_13,
+            InputType.TITLE,
+        }
+    )
 
     def normalize_isbn(self, isbn: str | ISBN) -> tuple[str | None, str | None]:
         """

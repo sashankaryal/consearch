@@ -6,7 +6,7 @@ from consearch.search.client import (
     AsyncMeilisearchClient,
 )
 from consearch.search.indexer import SearchIndexer
-from consearch.search.searcher import SearchFilters, SearchHit, SearchResponse, Searcher
+from consearch.search.searcher import Searcher, SearchFilters, SearchHit, SearchResponse
 
 __all__ = [
     # Client

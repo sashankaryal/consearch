@@ -41,9 +41,7 @@ class ISBN(BaseModel):
 
     def _validate_isbn10_checksum(self) -> bool:
         """Validate ISBN-10 checksum using modulo 11."""
-        total = sum(
-            (10 if c == "X" else int(c)) * (10 - i) for i, c in enumerate(self.value)
-        )
+        total = sum((10 if c == "X" else int(c)) * (10 - i) for i, c in enumerate(self.value))
         return total % 11 == 0
 
     def _validate_isbn13_checksum(self) -> bool:

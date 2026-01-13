@@ -19,12 +19,14 @@ class AbstractPaperResolver(AbstractResolver[PaperRecord]):
     Provides DOI and arXiv handling and paper-specific functionality.
     """
 
-    SUPPORTED_INPUT_TYPES: ClassVar[frozenset[InputType]] = frozenset({
-        InputType.DOI,
-        InputType.ARXIV,
-        InputType.TITLE,
-        InputType.CITATION,
-    })
+    SUPPORTED_INPUT_TYPES: ClassVar[frozenset[InputType]] = frozenset(
+        {
+            InputType.DOI,
+            InputType.ARXIV,
+            InputType.TITLE,
+            InputType.CITATION,
+        }
+    )
 
     def parse_doi(self, value: str) -> DOI | None:
         """Parse a DOI string, returning None if invalid."""
@@ -50,7 +52,7 @@ class AbstractPaperResolver(AbstractResolver[PaperRecord]):
 
     async def search_by_arxiv(
         self,
-        arxiv_id: ArXivID,
+        _arxiv_id: ArXivID,
     ) -> ResolutionResult[PaperRecord]:
         """
         Search for a paper by arXiv ID.

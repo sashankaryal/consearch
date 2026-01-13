@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
@@ -34,7 +33,7 @@ class SearchIndexer:
         """
         self._client = client
 
-    async def index_work(self, work: "WorkModel") -> None:
+    async def index_work(self, work: WorkModel) -> None:
         """
         Index a single work into the appropriate index.
 
@@ -48,7 +47,7 @@ class SearchIndexer:
         else:
             logger.warning(f"Unknown work type: {work.work_type}")
 
-    async def index_book(self, work: "WorkModel") -> None:
+    async def index_book(self, work: WorkModel) -> None:
         """
         Index a book work into the books index.
 
@@ -59,7 +58,7 @@ class SearchIndexer:
         task = await self._client.add_documents(BOOKS_INDEX, [doc])
         logger.debug(f"Indexed book {work.id}, task: {task.task_uid}")
 
-    async def index_paper(self, work: "WorkModel") -> None:
+    async def index_paper(self, work: WorkModel) -> None:
         """
         Index a paper work into the papers index.
 
@@ -70,14 +69,14 @@ class SearchIndexer:
         task = await self._client.add_documents(PAPERS_INDEX, [doc])
         logger.debug(f"Indexed paper {work.id}, task: {task.task_uid}")
 
-    async def index_books_batch(self, works: list["WorkModel"]) -> None:
+    async def index_books_batch(self, works: list[WorkModel]) -> None:
         """Index multiple books in a batch."""
         docs = [self._work_to_book_document(w) for w in works]
         if docs:
             task = await self._client.add_documents(BOOKS_INDEX, docs)
             logger.info(f"Indexed {len(docs)} books, task: {task.task_uid}")
 
-    async def index_papers_batch(self, works: list["WorkModel"]) -> None:
+    async def index_papers_batch(self, works: list[WorkModel]) -> None:
         """Index multiple papers in a batch."""
         docs = [self._work_to_paper_document(w) for w in works]
         if docs:
@@ -96,7 +95,7 @@ class SearchIndexer:
         task = await self._client.delete_documents(index_name, [str(work_id)])
         logger.debug(f"Removed {work_id} from {index_name}, task: {task.task_uid}")
 
-    async def reindex_all(self, session: "AsyncSession") -> None:
+    async def reindex_all(self, session: AsyncSession) -> None:
         """
         Reindex all works from the database.
 
@@ -126,7 +125,7 @@ class SearchIndexer:
 
         logger.info(f"Reindexing complete: {len(books)} books, {len(papers)} papers")
 
-    def _work_to_book_document(self, work: "WorkModel") -> dict[str, Any]:
+    def _work_to_book_document(self, work: WorkModel) -> dict[str, Any]:
         """Convert a book work to a Meilisearch document."""
         # Extract author names from relationships
         authors = [author.name for author in work.authors] if work.authors else []
@@ -149,7 +148,7 @@ class SearchIndexer:
             "created_at": work.created_at.isoformat() if work.created_at else None,
         }
 
-    def _work_to_paper_document(self, work: "WorkModel") -> dict[str, Any]:
+    def _work_to_paper_document(self, work: WorkModel) -> dict[str, Any]:
         """Convert a paper work to a Meilisearch document."""
         # Extract author names from relationships
         authors = [author.name for author in work.authors] if work.authors else []

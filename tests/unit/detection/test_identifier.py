@@ -32,7 +32,9 @@ class TestISBNDetection:
             ("ISBN: 0134093410", InputType.ISBN_10),
         ],
     )
-    def test_isbn10_detection(self, detector: IdentifierDetector, query: str, expected_type: InputType):
+    def test_isbn10_detection(
+        self, detector: IdentifierDetector, query: str, expected_type: InputType
+    ):
         """ISBN-10 formats should be detected correctly."""
         result = detector.detect(query)
         assert result.input_type == expected_type
@@ -49,7 +51,9 @@ class TestISBNDetection:
             ("ISBN-13: 9780134093413", InputType.ISBN_13),
         ],
     )
-    def test_isbn13_detection(self, detector: IdentifierDetector, query: str, expected_type: InputType):
+    def test_isbn13_detection(
+        self, detector: IdentifierDetector, query: str, expected_type: InputType
+    ):
         """ISBN-13 formats should be detected correctly."""
         result = detector.detect(query)
         assert result.input_type == expected_type

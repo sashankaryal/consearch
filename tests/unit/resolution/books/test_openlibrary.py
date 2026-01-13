@@ -364,9 +364,7 @@ class TestOpenLibraryFetchById:
     @respx.mock
     async def test_fetch_by_id_not_found(self, resolver: OpenLibraryResolver):
         """fetch_by_id with invalid ID should return None."""
-        respx.get("https://openlibrary.org/books/OL99999M.json").mock(
-            return_value=Response(404)
-        )
+        respx.get("https://openlibrary.org/books/OL99999M.json").mock(return_value=Response(404))
 
         record = await resolver.fetch_by_id("/books/OL99999M")
 

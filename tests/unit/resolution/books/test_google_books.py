@@ -395,9 +395,7 @@ class TestGoogleBooksErrorHandling:
     @respx.mock
     async def test_server_error(self, resolver: GoogleBooksResolver):
         """Server error should return ERROR status."""
-        respx.get("https://www.googleapis.com/books/v1/volumes").mock(
-            return_value=Response(500)
-        )
+        respx.get("https://www.googleapis.com/books/v1/volumes").mock(return_value=Response(500))
 
         isbn = ISBN.parse("9780134093413")
         result = await resolver.search_by_isbn(isbn)
@@ -408,9 +406,7 @@ class TestGoogleBooksErrorHandling:
     @respx.mock
     async def test_rate_limit_error(self, resolver_no_retry: GoogleBooksResolver):
         """Rate limit error should be handled."""
-        respx.get("https://www.googleapis.com/books/v1/volumes").mock(
-            return_value=Response(429)
-        )
+        respx.get("https://www.googleapis.com/books/v1/volumes").mock(return_value=Response(429))
 
         isbn = ISBN.parse("9780134093413")
         result = await resolver_no_retry.search_by_isbn(isbn)

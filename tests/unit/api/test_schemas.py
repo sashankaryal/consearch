@@ -10,17 +10,16 @@ from consearch.api.schemas import (
     BookResponse,
     IdentifiersResponse,
     PaperResponse,
+    ResolutionSourceResult,
     ResolveBookRequest,
     ResolveBookResponse,
     ResolvePaperRequest,
     ResolvePaperResponse,
-    ResolutionSourceResult,
     SearchBooksResponse,
     SearchPapersResponse,
     SourceMetadataResponse,
 )
 from consearch.core.types import InputType, ResolutionStatus, SourceName
-
 
 # ============================================================================
 # Request Schema Tests
@@ -61,11 +60,13 @@ class TestResolveBookRequest:
 
     def test_camel_case_alias(self):
         """Should accept camelCase field names."""
-        request = ResolveBookRequest.model_validate({
-            "query": "test",
-            "inputType": "isbn_13",
-            "includeRawData": True,
-        })
+        request = ResolveBookRequest.model_validate(
+            {
+                "query": "test",
+                "inputType": "isbn_13",
+                "includeRawData": True,
+            }
+        )
         assert request.input_type == InputType.ISBN_13
         assert request.include_raw_data is True
 

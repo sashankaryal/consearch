@@ -5,7 +5,6 @@ from __future__ import annotations
 import pytest
 from httpx import AsyncClient
 
-
 pytestmark = [pytest.mark.integration]
 
 
@@ -277,9 +276,7 @@ class TestSearchBooksEndpoint:
 
         assert response.status_code == 422  # Missing required parameter
 
-    async def test_search_books_returns_503_without_meilisearch(
-        self, test_client: AsyncClient
-    ):
+    async def test_search_books_returns_503_without_meilisearch(self, test_client: AsyncClient):
         """Should return 503 when Meilisearch is not available."""
         response = await test_client.get(
             "/api/v1/search/books",
@@ -325,9 +322,7 @@ class TestSearchPapersEndpoint:
 
         assert response.status_code == 422
 
-    async def test_search_papers_returns_503_without_meilisearch(
-        self, test_client: AsyncClient
-    ):
+    async def test_search_papers_returns_503_without_meilisearch(self, test_client: AsyncClient):
         """Should return 503 when Meilisearch is not available."""
         response = await test_client.get(
             "/api/v1/search/papers",
@@ -606,7 +601,9 @@ class TestWithMockedServices:
         await search_client._client.index(search_client._books_index).add_documents(test_books)
         # Wait for indexing to complete
         await search_client._client.index(search_client._books_index).wait_for_task(
-            (await search_client._client.index(search_client._books_index).get_tasks()).results[0].uid
+            (await search_client._client.index(search_client._books_index).get_tasks())
+            .results[0]
+            .uid
         )
 
         # Create app with search client

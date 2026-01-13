@@ -8,7 +8,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
-from .types import ConsumableType, SourceName
+from .types import SourceName
 
 
 class Author(BaseModel):
@@ -89,9 +89,7 @@ class BaseRecord(BaseModel):
     language: str | None = Field(default=None, description="ISO 639-1 language code")
 
     identifiers: Identifiers = Field(default_factory=Identifiers, description="All identifiers")
-    source_metadata: SourceMetadata | None = Field(
-        default=None, description="Source information"
-    )
+    source_metadata: SourceMetadata | None = Field(default=None, description="Source information")
 
     # For aggregated results
     additional_sources: list[SourceMetadata] = Field(

@@ -93,16 +93,20 @@ def load_fixture(category: str, name: str) -> dict[str, Any]:
 @pytest.fixture
 def load_book_fixture():
     """Factory fixture to load book API response fixtures."""
+
     def _load(name: str) -> dict[str, Any]:
         return load_fixture("books", name)
+
     return _load
 
 
 @pytest.fixture
 def load_paper_fixture():
     """Factory fixture to load paper API response fixtures."""
+
     def _load(name: str) -> dict[str, Any]:
         return load_fixture("papers", name)
+
     return _load
 
 
@@ -164,7 +168,9 @@ def openlibrary_isbn_response() -> dict[str, Any]:
             "url": "https://openlibrary.org/books/OL12345M/Clean_Code",
             "key": "/books/OL12345M",
             "title": "Clean Code: A Handbook of Agile Software Craftsmanship",
-            "authors": [{"url": "https://openlibrary.org/authors/OL123A", "name": "Robert C. Martin"}],
+            "authors": [
+                {"url": "https://openlibrary.org/authors/OL123A", "name": "Robert C. Martin"}
+            ],
             "publishers": [{"name": "Prentice Hall"}],
             "publish_date": "2008",
             "number_of_pages": 464,

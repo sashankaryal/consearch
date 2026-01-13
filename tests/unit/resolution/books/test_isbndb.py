@@ -298,9 +298,7 @@ class TestISBNDbErrorHandling:
     @respx.mock
     async def test_server_error(self, resolver: ISBNDbResolver):
         """Server error should return ERROR status."""
-        respx.get("https://api2.isbndb.com/book/9780134093413").mock(
-            return_value=Response(500)
-        )
+        respx.get("https://api2.isbndb.com/book/9780134093413").mock(return_value=Response(500))
 
         isbn = ISBN.parse("9780134093413")
         result = await resolver.search_by_isbn(isbn)

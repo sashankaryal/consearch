@@ -7,7 +7,6 @@ import pytest
 from consearch.cache.keys import CacheKeys
 from consearch.core.types import ConsumableType, SourceName
 
-
 # ============================================================================
 # Resolution Key Tests
 # ============================================================================
@@ -20,7 +19,11 @@ class TestResolutionKeys:
         "consumable_type,identifier,expected",
         [
             (ConsumableType.BOOK, "9780134093413", "consearch:resolve:book:9780134093413"),
-            (ConsumableType.PAPER, "10.1038/nature12373", "consearch:resolve:paper:10.1038/nature12373"),
+            (
+                ConsumableType.PAPER,
+                "10.1038/nature12373",
+                "consearch:resolve:paper:10.1038/nature12373",
+            ),
             ("book", "test-id", "consearch:resolve:book:test-id"),
             ("paper", "test-id", "consearch:resolve:paper:test-id"),
         ],

@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from consearch.core.models import BookRecord, PaperRecord
 from consearch.core.normalization import normalize_title
-from consearch.core.types import ConsumableType, InputType, ResolutionStatus
+from consearch.core.types import ConsumableType, InputType
 from consearch.detection.identifier import IdentifierDetector
 from consearch.resolution.chain import AggregatedResult
 
@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
     from consearch.cache.client import AsyncRedisClient
-    from consearch.db.models.author import AuthorModel
     from consearch.db.models.work import WorkModel
     from consearch.resolution.registry import ResolverRegistry
     from consearch.search.indexer import SearchIndexer
@@ -42,10 +41,10 @@ class ResolutionService:
 
     def __init__(
         self,
-        session: "AsyncSession",
-        resolver_registry: "ResolverRegistry",
-        cache: "AsyncRedisClient | None" = None,
-        indexer: "SearchIndexer | None" = None,
+        session: AsyncSession,
+        resolver_registry: ResolverRegistry,
+        cache: AsyncRedisClient | None = None,
+        indexer: SearchIndexer | None = None,
     ) -> None:
         """
         Initialize the resolution service.
@@ -191,7 +190,7 @@ class ResolutionService:
         self,
         query: str,
         input_type: InputType,
-    ) -> "WorkModel | None":
+    ) -> WorkModel | None:
         """Check database for existing book by identifier."""
         from consearch.db.repositories.work import WorkRepository
 
@@ -207,7 +206,7 @@ class ResolutionService:
         self,
         query: str,
         input_type: InputType,
-    ) -> "WorkModel | None":
+    ) -> WorkModel | None:
         """Check database for existing paper by identifier."""
         from consearch.db.repositories.work import WorkRepository
 
@@ -221,9 +220,8 @@ class ResolutionService:
         # For title/citation searches, we don't check DB
         return None
 
-    async def _persist_book_record(self, record: BookRecord) -> "WorkModel | None":
+    async def _persist_book_record(self, record: BookRecord) -> WorkModel | None:
         """Persist a book record to the database."""
-        from consearch.db.models.author import AuthorModel
         from consearch.db.models.source_record import SourceRecordModel
         from consearch.db.models.work import WorkModel
         from consearch.db.repositories.author import AuthorRepository
@@ -270,6 +268,7 @@ class ResolutionService:
 
         # Create/link authors with positions
         from sqlalchemy import insert
+
         from consearch.db.models.associations import work_author_association
 
         for i, author_record in enumerate(record.authors):
@@ -303,7 +302,7 @@ class ResolutionService:
                     source=record.source_metadata.source,
                     source_id=record.source_metadata.source_id,
                     raw_data=record.source_metadata.raw_data or {},
-                    fetched_at=datetime.now(timezone.utc),
+                    fetched_at=datetime.now(UTC),
                 )
                 self._session.add(source_record)
 
@@ -319,9 +318,8 @@ class ResolutionService:
         logger.info(f"Persisted book: {record.title}")
         return work
 
-    async def _persist_paper_record(self, record: PaperRecord) -> "WorkModel | None":
+    async def _persist_paper_record(self, record: PaperRecord) -> WorkModel | None:
         """Persist a paper record to the database."""
-        from consearch.db.models.author import AuthorModel
         from consearch.db.models.source_record import SourceRecordModel
         from consearch.db.models.work import WorkModel
         from consearch.db.repositories.author import AuthorRepository
@@ -372,6 +370,7 @@ class ResolutionService:
 
         # Create/link authors with positions
         from sqlalchemy import insert
+
         from consearch.db.models.associations import work_author_association
 
         for i, author_record in enumerate(record.authors):
@@ -405,7 +404,7 @@ class ResolutionService:
                     source=record.source_metadata.source,
                     source_id=record.source_metadata.source_id,
                     raw_data=record.source_metadata.raw_data or {},
-                    fetched_at=datetime.now(timezone.utc),
+                    fetched_at=datetime.now(UTC),
                 )
                 self._session.add(source_record)
 
@@ -421,7 +420,7 @@ class ResolutionService:
         logger.info(f"Persisted paper: {record.title}")
         return work
 
-    def _work_to_book_record(self, work: "WorkModel") -> BookRecord | None:
+    def _work_to_book_record(self, work: WorkModel) -> BookRecord | None:
         """Convert a WorkModel to BookRecord."""
         from consearch.core.models import Author, Identifiers
 
@@ -451,7 +450,7 @@ class ResolutionService:
             language=idents.get("language"),
         )
 
-    def _work_to_paper_record(self, work: "WorkModel") -> PaperRecord | None:
+    def _work_to_paper_record(self, work: WorkModel) -> PaperRecord | None:
         """Convert a WorkModel to PaperRecord."""
         from consearch.core.models import Author, Identifiers
 

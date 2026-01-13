@@ -173,7 +173,9 @@ class TestCrossrefDOILookup:
 
         # Check User-Agent or mailto parameter
         request = route.calls[0].request
-        assert "mailto" in str(request.url) or "test@example.com" in request.headers.get("User-Agent", "")
+        assert "mailto" in str(request.url) or "test@example.com" in request.headers.get(
+            "User-Agent", ""
+        )
 
 
 # ============================================================================
@@ -204,10 +206,13 @@ class TestCrossrefTitleSearch:
     async def test_title_search_no_results(self, resolver: CrossrefResolver):
         """Title search with no results should return NOT_FOUND."""
         respx.get("https://api.crossref.org/works").mock(
-            return_value=Response(200, json={
-                "status": "ok",
-                "message": {"total-results": 0, "items": []},
-            })
+            return_value=Response(
+                200,
+                json={
+                    "status": "ok",
+                    "message": {"total-results": 0, "items": []},
+                },
+            )
         )
 
         result = await resolver.search_by_title("Nonexistent Paper XYZ")
@@ -332,9 +337,7 @@ class TestCrossrefErrorHandling:
     @respx.mock
     async def test_server_error(self, resolver: CrossrefResolver):
         """Server error should return ERROR status."""
-        respx.get("https://api.crossref.org/works/10.1038/test").mock(
-            return_value=Response(500)
-        )
+        respx.get("https://api.crossref.org/works/10.1038/test").mock(return_value=Response(500))
 
         doi = DOI(value="10.1038/test")
         result = await resolver.search_by_doi(doi)

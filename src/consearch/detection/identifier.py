@@ -235,7 +235,9 @@ class IdentifierDetector:
                 # Looks like ISBN but invalid checksum - still report as likely ISBN
                 if len(normalized) in (10, 13):
                     return DetectionResult(
-                        input_type=InputType.ISBN_13 if len(normalized) == 13 else InputType.ISBN_10,
+                        input_type=InputType.ISBN_13
+                        if len(normalized) == 13
+                        else InputType.ISBN_10,
                         confidence=0.5,
                         normalized_value=normalized,
                     )

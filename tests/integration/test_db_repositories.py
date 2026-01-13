@@ -14,7 +14,6 @@ from consearch.db.models.work import WorkModel
 from consearch.db.repositories.author import AuthorRepository
 from consearch.db.repositories.work import WorkRepository
 
-
 pytestmark = [pytest.mark.integration, pytest.mark.requires_db]
 
 
@@ -320,9 +319,7 @@ class TestWorkRepositoryTitleQueries:
 class TestWorkRepositoryRelations:
     """Tests for relationship loading on WorkRepository."""
 
-    async def test_get_with_relations(
-        self, db_session: AsyncSession, sample_book_work: WorkModel
-    ):
+    async def test_get_with_relations(self, db_session: AsyncSession, sample_book_work: WorkModel):
         """Should load work with relationships."""
         repo = WorkRepository(db_session)
 
@@ -565,30 +562,27 @@ class TestTransactionIsolation:
         # Note: The fixture automatically rolls back, so we can't verify
         # the rollback here. This test mainly documents expected behavior.
 
-    async def test_session_isolation(
-        self, db_session_factory, sample_book_work: WorkModel
-    ):
+    async def test_session_isolation(self, db_session_factory, sample_book_work: WorkModel):
         """Each session should be isolated."""
         # Create two separate sessions
-        async with db_session_factory() as session1:
-            async with session1.begin():
-                repo1 = WorkRepository(session1)
+        async with db_session_factory() as session1, session1.begin():
+            repo1 = WorkRepository(session1)
 
-                # Create a work in session1
-                work = WorkModel(
-                    id=uuid4(),
-                    work_type=ConsumableType.BOOK,
-                    title="Session 1 Work",
-                    title_normalized="session 1 work",
-                    identifiers={},
-                )
-                await repo1.create(work)
+            # Create a work in session1
+            work = WorkModel(
+                id=uuid4(),
+                work_type=ConsumableType.BOOK,
+                title="Session 1 Work",
+                title_normalized="session 1 work",
+                identifiers={},
+            )
+            await repo1.create(work)
 
-                # Don't commit - changes should not be visible to session2
-                async with db_session_factory() as session2:
-                    repo2 = WorkRepository(session2)
-                    # This should not find the uncommitted work
-                    found = await repo2.find_by_title("Session 1 Work")
-                    assert len(found) == 0
+            # Don't commit - changes should not be visible to session2
+            async with db_session_factory() as session2:
+                repo2 = WorkRepository(session2)
+                # This should not find the uncommitted work
+                found = await repo2.find_by_title("Session 1 Work")
+                assert len(found) == 0
 
-                await session1.rollback()
+            await session1.rollback()

@@ -7,7 +7,7 @@ from typing import Annotated
 from pydantic import Field
 
 from consearch.api.schemas.base import APIBaseSchema
-from consearch.core.types import ConsumableType, InputType
+from consearch.core.types import InputType
 
 
 class ResolveRequest(APIBaseSchema):

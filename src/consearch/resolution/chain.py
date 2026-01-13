@@ -60,7 +60,9 @@ class AggregatedResult(Generic[RecordT]):
         successful = [r for r in all_results if r.success]
         if not successful:
             # Return first result as fallback
-            return self.primary_result or (self.fallback_results[0] if self.fallback_results else None)
+            return self.primary_result or (
+                self.fallback_results[0] if self.fallback_results else None
+            )
 
         # Return first successful (already sorted by priority)
         return successful[0]
@@ -118,7 +120,7 @@ class ChainResolver(Generic[RecordT]):
 
                 result.sources_tried = [r.source.value for r in (results or [])]
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.warning("Fallback resolution timed out")
 
         # Aggregate all records
@@ -240,7 +242,7 @@ class ChainResolver(Generic[RecordT]):
         for resolver in self._resolvers:
             await resolver.close()
 
-    async def __aenter__(self) -> "ChainResolver[RecordT]":
+    async def __aenter__(self) -> ChainResolver[RecordT]:
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
