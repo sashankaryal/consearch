@@ -1,5 +1,11 @@
 # Consearch
 
+[![CI](https://github.com/sashankaryal/consearch/actions/workflows/ci.yml/badge.svg)](https://github.com/sashankaryal/consearch/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/sashankaryal/consearch/branch/main/graph/badge.svg)](https://codecov.io/gh/sashankaryal/consearch)
+[![PyPI version](https://badge.fury.io/py/consearch.svg)](https://badge.fury.io/py/consearch)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A unified consumable (books, papers) search and resolution library. Fetches metadata from multiple sources and provides a unified API for searching and resolving identifiers like ISBN, DOI, arXiv IDs, and more.
 
 ## Design Overview

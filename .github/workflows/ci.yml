@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff mypy pydantic
+
+      - name: Run Ruff linter
+        run: ruff check src tests
+
+      - name: Run Ruff formatter check
+        run: ruff format --check src tests
+
+      - name: Run mypy
+        run: mypy src
+
+  test:
+    name: Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: consearch
+          POSTGRES_PASSWORD: consearch
+          POSTGRES_DB: consearch
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd="pg_isready -U consearch"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      meilisearch:
+        image: getmeili/meilisearch:v1.6
+        env:
+          MEILI_MASTER_KEY: dev-master-key
+          MEILI_ENV: development
+        ports:
+          - 7700:7700
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Wait for services
+        run: |
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5433 -U consearch && break
+            sleep 1
+          done
+
+      - name: Run migrations
+        env:
+          CONSEARCH_DATABASE_URL: postgresql+asyncpg://consearch:consearch@localhost:5433/consearch
+        run: alembic upgrade head
+
+      - name: Run tests with coverage
+        env:
+          CONSEARCH_DATABASE_URL: postgresql+asyncpg://consearch:consearch@localhost:5433/consearch
+          CONSEARCH_REDIS_URL: redis://localhost:6379/0
+          CONSEARCH_MEILISEARCH_URL: http://localhost:7700
+          CONSEARCH_MEILISEARCH_KEY: dev-master-key
+        run: |
+          pytest --cov=src/consearch --cov-report=xml --cov-report=term-missing
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: matrix.python-version == '3.11'
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          fail_ci_if_error: false

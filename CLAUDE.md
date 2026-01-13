@@ -1,2 +1,0 @@
-- Activate .venv before running any commands
-- See Makefile for all commands
