@@ -444,14 +444,226 @@ class TestResponseSchemas:
 class TestWithMockedServices:
     """Tests that require mocked external services."""
 
-    @pytest.mark.skip(reason="Requires mocked resolution service")
-    async def test_resolve_book_with_mocked_resolver(self, test_client: AsyncClient):
+    async def test_resolve_book_with_mocked_resolver(self, db_session_factory):
         """Should return book records when resolver is mocked."""
-        # This test would require additional fixtures to mock the resolution service
-        pass
+        from unittest.mock import AsyncMock
 
-    @pytest.mark.skip(reason="Requires Meilisearch")
-    async def test_search_books_with_meilisearch(self, test_client: AsyncClient):
+        from fastapi import FastAPI
+        from httpx import ASGITransport, AsyncClient
+
+        from consearch.api.dependencies import (
+            get_cache_client,
+            get_db_session,
+            get_resolution_service,
+            get_resolver_registry,
+            get_search_indexer,
+        )
+        from consearch.api.routes import health_router, resolve_router, search_router
+        from consearch.core.models import Author, BookRecord, Identifiers, SourceMetadata
+        from consearch.core.types import ResolutionStatus, SourceName
+        from consearch.resolution.base import ResolutionResult
+        from consearch.resolution.chain import AggregatedResult
+        from consearch.resolution.registry import ResolverRegistry
+
+        # Create a mock resolution service that returns test data
+        mock_service = AsyncMock()
+        mock_service.resolve_book.return_value = AggregatedResult(
+            primary_result=ResolutionResult(
+                status=ResolutionStatus.SUCCESS,
+                source=SourceName.OPEN_LIBRARY,
+                records=[
+                    BookRecord(
+                        title="Clean Code",
+                        authors=[Author(name="Robert C. Martin")],
+                        year=2008,
+                        identifiers=Identifiers(
+                            isbn_13="9780132350884",
+                            isbn_10="0132350882",
+                        ),
+                        publisher="Prentice Hall",
+                        source_metadata=SourceMetadata(
+                            source=SourceName.OPEN_LIBRARY,
+                            source_id="OL12345W",
+                        ),
+                    )
+                ],
+                duration_ms=50.0,
+            ),
+            fallback_results=[],
+            all_records=[
+                BookRecord(
+                    title="Clean Code",
+                    authors=[Author(name="Robert C. Martin")],
+                    year=2008,
+                    identifiers=Identifiers(
+                        isbn_13="9780132350884",
+                        isbn_10="0132350882",
+                    ),
+                    publisher="Prentice Hall",
+                    source_metadata=SourceMetadata(
+                        source=SourceName.OPEN_LIBRARY,
+                        source_id="OL12345W",
+                    ),
+                )
+            ],
+        )
+
+        # Create app with mocked service
+        app = FastAPI()
+        app.include_router(health_router, prefix="/api/v1")
+        app.include_router(resolve_router, prefix="/api/v1")
+        app.include_router(search_router, prefix="/api/v1")
+
+        app.state.db_session_factory = db_session_factory
+        app.state.cache_client = None
+        app.state.search_client = None
+        app.state.search_indexer = None
+
+        registry = ResolverRegistry()
+        app.state.resolver_registry = registry
+
+        async def override_db_session():
+            async with db_session_factory() as session:
+                try:
+                    yield session
+                    await session.commit()
+                except Exception:
+                    await session.rollback()
+                    raise
+
+        async def override_resolver_registry():
+            return registry
+
+        async def override_cache_client():
+            return None
+
+        async def override_search_indexer():
+            return None
+
+        async def override_resolution_service():
+            return mock_service
+
+        app.dependency_overrides[get_db_session] = override_db_session
+        app.dependency_overrides[get_resolver_registry] = override_resolver_registry
+        app.dependency_overrides[get_cache_client] = override_cache_client
+        app.dependency_overrides[get_search_indexer] = override_search_indexer
+        app.dependency_overrides[get_resolution_service] = override_resolution_service
+
+        # Test the endpoint
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.post(
+                "/api/v1/resolve/book",
+                json={"query": "9780132350884"},  # ISBN-13
+            )
+
+            assert response.status_code == 200
+            data = response.json()
+            assert data["status"] == "success"
+            assert len(data["records"]) == 1
+            assert data["records"][0]["title"] == "Clean Code"
+            assert data["records"][0]["authors"][0]["name"] == "Robert C. Martin"
+            assert data["records"][0]["identifiers"]["isbn13"] == "9780132350884"
+
+        # Cleanup
+        app.dependency_overrides.clear()
+        await registry.close_all()
+
+    async def test_search_books_with_meilisearch(self, db_session_factory, search_client):
         """Should search books when Meilisearch is available."""
-        # This test requires the search_client fixture to be injected
-        pass
+        from fastapi import FastAPI
+        from httpx import ASGITransport, AsyncClient
+
+        from consearch.api.dependencies import (
+            get_cache_client,
+            get_db_session,
+            get_resolver_registry,
+            get_search_client,
+            get_search_indexer,
+        )
+        from consearch.api.routes import health_router, resolve_router, search_router
+        from consearch.resolution.registry import ResolverRegistry
+
+        # Index some test data
+        test_books = [
+            {
+                "id": "test-book-1",
+                "title": "Clean Code",
+                "authors": ["Robert C. Martin"],
+                "year": 2008,
+                "language": "en",
+            },
+            {
+                "id": "test-book-2",
+                "title": "The Pragmatic Programmer",
+                "authors": ["David Thomas", "Andrew Hunt"],
+                "year": 2019,
+                "language": "en",
+            },
+        ]
+
+        # Add documents to the test index
+        await search_client._client.index(search_client._books_index).add_documents(test_books)
+        # Wait for indexing to complete
+        await search_client._client.index(search_client._books_index).wait_for_task(
+            (await search_client._client.index(search_client._books_index).get_tasks()).results[0].uid
+        )
+
+        # Create app with search client
+        app = FastAPI()
+        app.include_router(health_router, prefix="/api/v1")
+        app.include_router(resolve_router, prefix="/api/v1")
+        app.include_router(search_router, prefix="/api/v1")
+
+        app.state.db_session_factory = db_session_factory
+        app.state.cache_client = None
+        app.state.search_client = search_client
+
+        registry = ResolverRegistry()
+        app.state.resolver_registry = registry
+
+        async def override_db_session():
+            async with db_session_factory() as session:
+                try:
+                    yield session
+                    await session.commit()
+                except Exception:
+                    await session.rollback()
+                    raise
+
+        async def override_resolver_registry():
+            return registry
+
+        async def override_cache_client():
+            return None
+
+        async def override_search_client():
+            return search_client
+
+        async def override_search_indexer():
+            return None
+
+        app.dependency_overrides[get_db_session] = override_db_session
+        app.dependency_overrides[get_resolver_registry] = override_resolver_registry
+        app.dependency_overrides[get_cache_client] = override_cache_client
+        app.dependency_overrides[get_search_client] = override_search_client
+        app.dependency_overrides[get_search_indexer] = override_search_indexer
+
+        # Test the endpoint
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.get(
+                "/api/v1/search/books",
+                params={"query": "Clean Code"},
+            )
+
+            assert response.status_code == 200
+            data = response.json()
+            assert data["total"] >= 1
+            # The search should find "Clean Code"
+            titles = [r["title"] for r in data["results"]]
+            assert "Clean Code" in titles
+
+        # Cleanup
+        app.dependency_overrides.clear()
+        await registry.close_all()

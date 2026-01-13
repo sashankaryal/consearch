@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import time
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 from consearch.core.models import BookRecord, PaperRecord
@@ -265,27 +266,51 @@ class ResolutionService:
         )
 
         self._session.add(work)
+        await self._session.flush()  # Flush work first to get its ID
 
-        # Create/link authors
+        # Create/link authors with positions
+        from sqlalchemy import insert
+        from consearch.db.models.associations import work_author_association
+
         for i, author_record in enumerate(record.authors):
-            author = await author_repo.get_or_create(
+            author, _ = await author_repo.get_or_create(
                 name=author_record.name,
-                orcid=author_record.orcid,
+                name_normalized=normalize_title(author_record.name),  # Normalize for matching
+                external_ids={"orcid": author_record.orcid} if author_record.orcid else None,
             )
-            # Add to work's authors (position handled by association)
-            work.authors.append(author)
+            # Insert into association table with explicit position
+            stmt = insert(work_author_association).values(
+                work_id=work.id,
+                author_id=author.id,
+                position=i,
+            )
+            await self._session.execute(stmt)
 
-        # Create source record if we have metadata
+        # Create source record if we have metadata and it doesn't exist
         if record.source_metadata:
-            source_record = SourceRecordModel(
-                work=work,
-                source=record.source_metadata.source,
-                source_id=record.source_metadata.source_id,
-                raw_data=record.source_metadata.raw_data or {},
+            from sqlalchemy import select
+
+            # Check if source record already exists
+            existing_source = await self._session.execute(
+                select(SourceRecordModel).where(
+                    SourceRecordModel.source == record.source_metadata.source,
+                    SourceRecordModel.source_id == record.source_metadata.source_id,
+                )
             )
-            self._session.add(source_record)
+            if not existing_source.scalar_one_or_none():
+                source_record = SourceRecordModel(
+                    work=work,
+                    source=record.source_metadata.source,
+                    source_id=record.source_metadata.source_id,
+                    raw_data=record.source_metadata.raw_data or {},
+                    fetched_at=datetime.now(timezone.utc),
+                )
+                self._session.add(source_record)
 
         await self._session.flush()
+
+        # Refresh work to load authors relationship for indexer
+        await self._session.refresh(work, ["authors"])
 
         # Index to search
         if self._indexer:
@@ -343,26 +368,51 @@ class ResolutionService:
         )
 
         self._session.add(work)
+        await self._session.flush()  # Flush work first to get its ID
 
-        # Create/link authors
+        # Create/link authors with positions
+        from sqlalchemy import insert
+        from consearch.db.models.associations import work_author_association
+
         for i, author_record in enumerate(record.authors):
-            author = await author_repo.get_or_create(
+            author, _ = await author_repo.get_or_create(
                 name=author_record.name,
-                orcid=author_record.orcid,
+                name_normalized=normalize_title(author_record.name),
+                external_ids={"orcid": author_record.orcid} if author_record.orcid else None,
             )
-            work.authors.append(author)
+            # Insert into association table with explicit position
+            stmt = insert(work_author_association).values(
+                work_id=work.id,
+                author_id=author.id,
+                position=i,
+            )
+            await self._session.execute(stmt)
 
-        # Create source record if we have metadata
+        # Create source record if we have metadata and it doesn't exist
         if record.source_metadata:
-            source_record = SourceRecordModel(
-                work=work,
-                source=record.source_metadata.source,
-                source_id=record.source_metadata.source_id,
-                raw_data=record.source_metadata.raw_data or {},
+            from sqlalchemy import select
+
+            # Check if source record already exists
+            existing_source = await self._session.execute(
+                select(SourceRecordModel).where(
+                    SourceRecordModel.source == record.source_metadata.source,
+                    SourceRecordModel.source_id == record.source_metadata.source_id,
+                )
             )
-            self._session.add(source_record)
+            if not existing_source.scalar_one_or_none():
+                source_record = SourceRecordModel(
+                    work=work,
+                    source=record.source_metadata.source,
+                    source_id=record.source_metadata.source_id,
+                    raw_data=record.source_metadata.raw_data or {},
+                    fetched_at=datetime.now(timezone.utc),
+                )
+                self._session.add(source_record)
 
         await self._session.flush()
+
+        # Refresh work to load authors relationship for indexer
+        await self._session.refresh(work, ["authors"])
 
         # Index to search
         if self._indexer:

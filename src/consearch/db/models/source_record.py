@@ -41,7 +41,12 @@ class SourceRecordModel(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
     # Source identification
     source: Mapped[SourceName] = mapped_column(
-        Enum(SourceName, name="source_name", create_constraint=True),
+        Enum(
+            SourceName,
+            name="source_name",
+            create_type=False,
+            values_callable=lambda x: [e.value for e in x],
+        ),
         nullable=False,
         index=True,
     )

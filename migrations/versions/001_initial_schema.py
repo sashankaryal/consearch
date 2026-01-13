@@ -23,15 +23,23 @@ def upgrade() -> None:
     op.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')
     op.execute('CREATE EXTENSION IF NOT EXISTS "pg_trgm"')
 
-    # Create enums
+    # Create enums (use DO block for IF NOT EXISTS support)
     op.execute("""
-        CREATE TYPE consumable_type AS ENUM ('book', 'paper');
+        DO $$ BEGIN
+            CREATE TYPE consumable_type AS ENUM ('book', 'paper');
+        EXCEPTION
+            WHEN duplicate_object THEN null;
+        END $$;
     """)
     op.execute("""
-        CREATE TYPE source_name AS ENUM (
-            'isbndb', 'google_books', 'open_library',
-            'crossref', 'semantic_scholar', 'arxiv', 'pubmed'
-        );
+        DO $$ BEGIN
+            CREATE TYPE source_name AS ENUM (
+                'isbndb', 'google_books', 'open_library',
+                'crossref', 'semantic_scholar', 'arxiv', 'pubmed'
+            );
+        EXCEPTION
+            WHEN duplicate_object THEN null;
+        END $$;
     """)
 
     # Create authors table
@@ -80,7 +88,7 @@ def upgrade() -> None:
         ),
         sa.Column(
             "work_type",
-            sa.Enum("book", "paper", name="consumable_type", create_type=False),
+            postgresql.ENUM("book", "paper", name="consumable_type", create_type=False),
             nullable=False,
         ),
         sa.Column("title", sa.String(2000), nullable=False),
@@ -139,7 +147,7 @@ def upgrade() -> None:
         ),
         sa.Column(
             "source",
-            sa.Enum(
+            postgresql.ENUM(
                 "isbndb",
                 "google_books",
                 "open_library",

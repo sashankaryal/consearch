@@ -34,6 +34,12 @@ class AsyncRedisClient:
         self._redis = None
         self._pool = None
 
+    async def ping(self) -> bool:
+        """Ping Redis to check connection."""
+        if not self._redis:
+            return False
+        return await self._redis.ping()
+
     async def get(self, key: str) -> Any | None:
         """Get a value from cache."""
         if not self._redis:

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Literal
 
 from fastapi import APIRouter, Request
+from sqlalchemy import text
 
 from consearch.api.schemas import HealthResponse
 
@@ -28,7 +29,7 @@ async def health_check(request: Request) -> HealthResponse:
         db_factory = getattr(request.app.state, "db_session_factory", None)
         if db_factory:
             async with db_factory() as session:
-                await session.execute("SELECT 1")
+                await session.execute(text("SELECT 1"))
             services["database"] = "up"
         else:
             services["database"] = "unknown"

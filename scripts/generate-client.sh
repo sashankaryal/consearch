@@ -10,7 +10,7 @@ API_URL="${API_URL:-http://localhost:8000}"
 echo "Fetching OpenAPI schema from ${API_URL}..."
 
 # Fetch OpenAPI schema
-curl -s "${API_URL}/openapi.json" -o openapi.json
+curl -s "${API_URL}/api/openapi.json" -o openapi.json
 
 if [ ! -f openapi.json ]; then
     echo "Error: Failed to fetch OpenAPI schema"

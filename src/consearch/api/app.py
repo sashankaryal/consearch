@@ -25,10 +25,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = ConsearchSettings()
 
     # Initialize database
-    from consearch.db.session import create_session_factory
+    from consearch.db.base import create_engine, create_session_factory
 
     logger.info("Initializing database connection...")
-    app.state.db_session_factory = create_session_factory(str(settings.database_url))
+    app.state.db_engine = create_engine(str(settings.database_url))
+    app.state.db_session_factory = create_session_factory(app.state.db_engine)
 
     # Initialize Redis cache (optional)
     if settings.redis_url:
@@ -37,6 +38,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
             logger.info("Initializing Redis cache...")
             app.state.cache_client = AsyncRedisClient(str(settings.redis_url))
+            await app.state.cache_client.connect()
+            logger.info("Redis cache initialized")
         except Exception as e:
             logger.warning(f"Failed to initialize Redis: {e}")
             app.state.cache_client = None

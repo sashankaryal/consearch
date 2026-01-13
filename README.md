@@ -103,7 +103,24 @@ tests/
 | PMID | `12345678` | Paper |
 | Title | `Clean Code` | Both |
 
-## Setup
+## Quick Start (with Make)
+
+```bash
+# Full setup: venv, dependencies, env file
+make setup
+source .venv/bin/activate
+
+# Start services and run migrations
+make up
+make migrate
+
+# Start development server
+make dev
+```
+
+API will be available at `http://localhost:8000`. Interactive docs at `http://localhost:8000/docs`.
+
+## Setup (Manual)
 
 ### Prerequisites
 
@@ -151,8 +168,6 @@ alembic upgrade head
 ```bash
 uvicorn consearch.api.app:app --reload
 ```
-
-API will be available at `http://localhost:8000`. Interactive docs at `http://localhost:8000/docs`.
 
 ## Running Tests
 
@@ -245,6 +260,45 @@ mypy src
 pre-commit install
 pre-commit run --all-files
 ```
+
+## Make Commands
+
+Run `make help` to see all available commands. Here's a summary:
+
+| Command | Description |
+|---------|-------------|
+| **Setup** | |
+| `make setup` | Full setup: create venv, install deps, copy env template |
+| `make install` | Install dependencies (requires active venv) |
+| **Docker** | |
+| `make up` | Start Docker services (PostgreSQL, Redis, Meilisearch) |
+| `make down` | Stop Docker services |
+| `make down-v` | Stop services and remove volumes |
+| `make logs` | View logs (use `make logs service=postgres` for specific service) |
+| `make ps` | Show status of Docker services |
+| **Database** | |
+| `make migrate` | Run database migrations |
+| `make migrate-new msg="..."` | Create a new migration |
+| `make migrate-down` | Rollback last migration |
+| `make migrate-history` | Show migration history |
+| **Development** | |
+| `make dev` | Start development server with auto-reload |
+| **Testing** | |
+| `make test` | Run all tests |
+| `make test-unit` | Run unit tests only |
+| `make test-integration` | Run integration tests |
+| `make test-cov` | Run tests with coverage report |
+| **Code Quality** | |
+| `make lint` | Run linter (ruff) |
+| `make lint-fix` | Run linter with auto-fix |
+| `make format` | Format code |
+| `make typecheck` | Run type checker (mypy) |
+| `make check` | Run all checks (lint, format, typecheck) |
+| **Utilities** | |
+| `make hooks-install` | Install pre-commit hooks |
+| `make hooks-run` | Run pre-commit hooks on all files |
+| `make clean` | Clean up build artifacts and caches |
+| `make reset` | Full reset: stop services, remove volumes, clean artifacts |
 
 ## License
 

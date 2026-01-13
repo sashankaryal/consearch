@@ -129,11 +129,7 @@ class SearchIndexer:
     def _work_to_book_document(self, work: "WorkModel") -> dict[str, Any]:
         """Convert a book work to a Meilisearch document."""
         # Extract author names from relationships
-        authors = []
-        if work.work_authors:
-            for wa in sorted(work.work_authors, key=lambda x: x.position):
-                if wa.author:
-                    authors.append(wa.author.name)
+        authors = [author.name for author in work.authors] if work.authors else []
 
         identifiers = work.identifiers or {}
 
@@ -156,11 +152,7 @@ class SearchIndexer:
     def _work_to_paper_document(self, work: "WorkModel") -> dict[str, Any]:
         """Convert a paper work to a Meilisearch document."""
         # Extract author names from relationships
-        authors = []
-        if work.work_authors:
-            for wa in sorted(work.work_authors, key=lambda x: x.position):
-                if wa.author:
-                    authors.append(wa.author.name)
+        authors = [author.name for author in work.authors] if work.authors else []
 
         identifiers = work.identifiers or {}
 
